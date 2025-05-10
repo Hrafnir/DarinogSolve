@@ -1,10 +1,10 @@
-/* Version: #7 */
+/* Version: #8 */
 document.addEventListener('DOMContentLoaded', () => {
     // === HTML ELEMENT REFERENCES ===
     const teamCodeInput = document.getElementById('team-code-input');
     const startWithTeamCodeButton = document.getElementById('start-with-team-code-button');
     const teamCodeFeedback = document.getElementById('team-code-feedback');
-    const startSound = document.getElementById('start-sound'); // For kort start-effekt
+    // const startSound = document.getElementById('start-sound'); // FJERNES - da filen ikke finnes
 
     const pages = document.querySelectorAll('#rebus-content .page');
     const checkButtons = document.querySelectorAll('.check-answer-btn');
@@ -193,13 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             resetAllPostUIs(); 
 
-            if (startSound) { // Dette er den korte lyden for rebus start
-                startSound.play().catch(e => console.warn("Kunne ikke spille start-effekt:", e));
-            }
-            // Forsøk å starte bakgrunnsmusikk hvis den ikke allerede spiller (f.eks. pga autoplay policy)
+            // Ingen startSound.play() her lenger
+
+            // Forsøk å starte bakgrunnsmusikk hvis den ikke allerede spiller
             if (backgroundAudio && backgroundAudio.paused) {
                 backgroundAudio.play().then(() => {
-                    playPauseButton.textContent = '⏸️';
+                    if (playPauseButton) playPauseButton.textContent = '⏸️';
                 }).catch(e => console.warn("Bakgrunnsmusikk kunne ikke starte automatisk etter lagstart:", e));
             }
             
@@ -282,6 +281,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupMusicControls() {
         if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) {
             console.warn("Ett eller flere musikk-kontroll elementer mangler.");
+            if (backgroundAudio) backgroundAudio.style.display = 'none'; // Skjul hvis kontroller mangler
+            const musicControlsDiv = document.getElementById('music-controls');
+            if (musicControlsDiv) musicControlsDiv.style.display = 'none';
             return;
         }
 
@@ -293,19 +295,21 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundAudio.volume = parseFloat(savedVolume);
             volumeSlider.value = parseFloat(savedVolume);
         } else {
-            backgroundAudio.volume = 0.5; // Default volum
+            backgroundAudio.volume = 0.5; 
             volumeSlider.value = 0.5;
         }
 
         backgroundAudio.muted = savedMuted;
         muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊';
 
-        // Event listeners for musikk-kontroller
         playPauseButton.addEventListener('click', () => {
             if (backgroundAudio.paused) {
                 backgroundAudio.play()
                     .then(() => playPauseButton.textContent = '⏸️')
-                    .catch(e => console.error("Feil ved avspilling av musikk:", e));
+                    .catch(e => {
+                        console.error("Feil ved avspilling av musikk (play):", e);
+                        alert("Kunne ikke spille musikken. Sjekk at filen audio/background_music.mp3 er korrekt og støttet av nettleseren.");
+                    });
             } else {
                 backgroundAudio.pause();
                 playPauseButton.textContent = '▶️';
@@ -321,7 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         volumeSlider.addEventListener('input', () => {
             backgroundAudio.volume = volumeSlider.value;
             localStorage.setItem('rebusMusicVolume', volumeSlider.value);
-            // Hvis dempet og volum endres, fjern demping for umiddelbar feedback
             if (backgroundAudio.muted && backgroundAudio.volume > 0) {
                 backgroundAudio.muted = false;
                 muteUnmuteButton.textContent = '🔊';
@@ -329,16 +332,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Forsøk autoplay (kan feile pga browser policy)
-        // Vi gjør dette her for å sikre at volum/mute er satt fra localStorage først
-        backgroundAudio.play()
-            .then(() => {
-                playPauseButton.textContent = '⏸️'; // Musikk spiller
-            })
-            .catch(error => {
-                console.warn('Autoplay av bakgrunnsmusikk forhindret:', error);
-                playPauseButton.textContent = '▶️'; // Musikk er pauset, klar for brukerstart
-            });
+        // LYTT ETTER 'canplaythrough' FØR AUTOPLAY-FORSØK FOR Å UNNGÅ "NotSupportedError" HVIS MULIG
+        backgroundAudio.addEventListener('canplaythrough', () => {
+            console.log("Bakgrunnsmusikk kan spilles helt gjennom.");
+            // Forsøk autoplay her, etter at filen er bekreftet lastet og klar
+            // Dette vil fortsatt kunne blokkeres av nettleserens autoplay policy
+            // men det reduserer sjansen for "NotSupportedError" hvis filen var problemet.
+            if (backgroundAudio.paused) { // Kun prøv play hvis den ikke allerede spiller (f.eks. fra brukerklikk)
+                 backgroundAudio.play()
+                    .then(() => {
+                        if (playPauseButton) playPauseButton.textContent = '⏸️';
+                    })
+                    .catch(error => {
+                        console.warn('Autoplay av bakgrunnsmusikk forhindret (etter canplaythrough):', error);
+                        if (playPauseButton) playPauseButton.textContent = '▶️';
+                    });
+            }
+        });
+
+        backgroundAudio.addEventListener('error', (e) => {
+            console.error("Feil med audio-elementet (backgroundAudio):", e);
+            if (playPauseButton) playPauseButton.textContent = '⚠️'; // Vis feilikon
+            // Vurder å vise en melding til brukeren her
+            // alert("En feil oppstod med bakgrunnsmusikken. Sjekk konsollen for detaljer.");
+        });
+        
+        // Manuell lasting for å trigge 'canplaythrough' eller 'error'
+        // backgroundAudio.load(); // Dette er vanligvis ikke nødvendig med `src` attributt, men kan hjelpe i noen tilfeller.
+                                // La oss se om 'canplaythrough' eventet fyres uten.
     }
 
 
@@ -465,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === INITIALIZATION ===
-    setupMusicControls(); // Sett opp musikk-kontroller og last preferanser
+    setupMusicControls(); 
 
     if (loadState()) { 
         showTabContent('rebus');
@@ -497,4 +518,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 }); // Slutt på DOMContentLoaded
-/* Version: #7 */
+/* Version: #8 */
