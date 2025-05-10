@@ -1,4 +1,4 @@
-/* Version: #12 */
+/* Version: #13 */
 document.addEventListener('DOMContentLoaded', () => {
     // === HTML ELEMENT REFERENCES ===
     const teamCodeInput = document.getElementById('team-code-input');
@@ -62,17 +62,33 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Kart-element #dynamic-map-container ikke funnet.");
             return;
         }
+
+        const mapStyles = [
+            {
+                featureType: "all", 
+                elementType: "labels", 
+                stylers: [{ visibility: "off" }] 
+            },
+            // Hvis du vil ha VEINAVN, kommenter inn og juster
+            /*
+            { featureType: "road", elementType: "labels.text.stroke", stylers: [{ visibility: "on" }] },
+            { featureType: "road", elementType: "labels.text.fill", stylers: [{ visibility: "on" }] }
+            */
+        ];
+
         map = new google.maps.Map(mapElement, {
             center: START_LOCATION,
-            zoom: 16,
-            mapId: 'c6a4f7dc5c6423aa4e76e70d' // DIN MAP ID ER SATT INN HER
-            // Hvis du ikke vil bruke cloud styling, kommenter ut mapId og bruk styles:
-            /*
-            styles: [ 
-                { featureType: "poi", stylers: [{ visibility: "off" }] },
-                // Flere stiler her for å fjerne andre ting om nødvendig
-            ]
-            */
+            zoom: 17, 
+            mapTypeId: google.maps.MapTypeId.SATELLITE, 
+            // mapId: 'c6a4f7dc5c6423aa4e76e70d', // Bruk DIN mapId hvis du har Cloud Styling for labels
+            styles: mapStyles, // Bruk dette for å forsøke å fjerne labels via JS
+            disableDefaultUI: false, 
+            streetViewControl: false, 
+            fullscreenControl: true, 
+            mapTypeControlOptions: { 
+                style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+                mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID]
+            }
         });
 
         new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title });
@@ -100,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon: { url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png' }
         });
         map.panTo({ lat: location.lat, lng: location.lng });
+        if (map.getZoom() < 17) map.setZoom(17);
     }
 
     function clearMapMarker() {
@@ -345,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // === EVENT LISTENERS (GENERELT) ===
     if (startWithTeamCodeButton) {
         startWithTeamCodeButton.addEventListener('click', () => { initializeTeam(teamCodeInput.value); });
     } 
@@ -364,15 +382,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (postLocation) bounds.extend(postLocation);
                 if (userPositionMarker && userPositionMarker.getPosition()) bounds.extend(userPositionMarker.getPosition());
                 
-                if (!bounds.isEmpty()) { // Sjekk om bounds har noen punkter
+                if (!bounds.isEmpty()) { 
                     map.fitBounds(bounds);
-                    if (map.getZoom() > 17) map.setZoom(17); // Unngå for mye zoom
-                    // Hvis bare ett punkt i bounds (f.eks. kun postLocation), panorer i stedet for fitBounds
+                    if (map.getZoom() > 17) map.setZoom(17); 
                     if (postLocation && (!userPositionMarker || !userPositionMarker.getPosition())) {
                         map.panTo(postLocation);
-                        map.setZoom(17); // Sett en passende zoom for enkeltpunkt
+                        map.setZoom(17); 
                     }
-                } else if (postLocation) { // Fallback hvis bounds er tom, men vi har postLocation
+                } else if (postLocation) { 
                      map.panTo(postLocation);
                      map.setZoom(17);
                 }
@@ -427,6 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // === INITIALIZATION ===
     setupMusicControls(); 
     if (loadState()) { 
         showTabContent('rebus');
@@ -450,4 +468,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
-/* Version: #12 */
+/* Version: #13 */
