@@ -1,4 +1,4 @@
-<!-- Version: #12 -->
+<!-- Version: #13 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -58,7 +58,6 @@
                     <h2>Post 2: Ansiktsgjenkjenning! 🤔</h2>
                     <p>Under ser du et bilde. Hvem er dette? Skriv kun fornavnet.</p>
                     <img src="images/kjendis1.jpg" alt="Bilde av en kjent person/figur" style="max-width: 80%; margin: 10px auto; display: block; border: 2px solid #ccc;">
-                    <!-- HUSK: Legg til images/kjendis1.jpg -->
                     <input type="text" id="post-2-task-input" placeholder="Skriv fornavnet">
                     <button class="check-task-btn" data-post="2">Sjekk Svar på Oppgave</button>
                     <div class="feedback" id="feedback-task-2"></div>
@@ -117,7 +116,6 @@
                     <h2>Post 5: Figurfinneren! 👾</h2>
                     <p>Hvem er denne kjente figuren? Skriv navnet.</p>
                     <img src="images/figur1.png" alt="Bilde av en kjent tegneserie/spillfigur" style="max-width: 70%; margin: 10px auto; display: block; border: 2px solid #ccc;">
-                    <!-- HUSK: Legg til images/figur1.png -->
                     <input type="text" id="post-5-task-input" placeholder="Skriv navnet på figuren">
                     <button class="check-task-btn" data-post="5">Sjekk Svar på Oppgave</button>
                     <div class="feedback" id="feedback-task-5"></div>
@@ -210,7 +208,11 @@
     </div>
 
     <script src="script.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=DIN_API_NØKKEL_HER&callback=initMap"></script>
+    <!-- Google Maps JavaScript API Script MED DIN NØKKEL -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5qUjSj9WyUKsZPljvHfp9RHd-dUjMblk&callback=initMap">
+    </script>
+
 </body>
 </html>
-<!-- Version: #12 -->
+<!-- Version: #13 -->
