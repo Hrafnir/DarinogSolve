@@ -18,7 +18,7 @@ let finishMarker = null;
 // === GLOBAL KONFIGURASJON ===
 const TOTAL_POSTS = 8; 
 const POST_LOCATIONS = [ 
-    { lat: 60.8007539616181, lng: 10.646227725129991, title: "Post 1", name: "Ved den røde husken"}, 
+    { lat: 60.796027992133574, lng: 10.67070067570614, title: "Post 1", name: "Ved den røde husken"}, 
     { lat: 60.80017468739349, lng: 10.64510651928592, title: "Post 2", name: "Ved den store eika"}, 
     { lat: 60.80072782302861, lng: 10.644889579638045, title: "Post 3", name: "På den lengste benken"}, 
     { lat: 60.80048329479234, lng: 10.643492818098643, title: "Post 4", name: "Ved informasjonstavlen"}, 
