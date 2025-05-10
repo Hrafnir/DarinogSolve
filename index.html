@@ -1,4 +1,4 @@
-<!-- Version: #15 -->
+<!-- Version: #16 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -10,14 +10,14 @@
 <body>
 
     <div class="container">
-
+        <!-- ... (resten av .container innhold som før) ... -->
         <div class="tabs">
             <button class="tab-button active" data-tab="rebus">Rebus</button>
             <button class="tab-button" data-tab="map">Kart</button>
         </div>
 
         <div id="rebus-content" class="tab-content visible">
-
+            <!-- ... (intro-page og alle post-pages som før) ... -->
             <div id="intro-page" class="page visible">
                 <h1>Velkommen til Rebusløpet!</h1>
                 <p>Skriv inn lagkoden deres for å starte:</p>
@@ -201,10 +201,18 @@
         <source src="audio/background_music.ogg" type="audio/ogg">
         Nettleseren din støtter ikke audio-elementet.
     </audio>
+
     <div id="music-controls">
         <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
         <button id="mute-unmute-button" title="Demp/Lyd på Musikk">🔊</button>
         <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" title="Volum">
+    </div>
+
+    <!-- NYTT: Kontroller for GPS Lydhjelp -->
+    <div id="gps-audio-controls">
+        <button id="toggle-gps-audio-button" title="GPS Nærhetslyd På/Av">🔊 GPS Av</button>
+        <label for="gps-audio-volume-slider" style="font-size:0.8em; color: white; margin-left: 5px;">Pip Volum:</label>
+        <input type="range" id="gps-audio-volume-slider" min="0" max="1" step="0.01" value="0.7" title="Volum Pipelyd">
     </div>
 
     <script src="script.js"></script>
@@ -214,4 +222,4 @@
 
 </body>
 </html>
-<!-- Version: #15 -->
+<!-- Version: #16 -->
