@@ -1,4 +1,4 @@
-/* Version: #21 */
+/* Version: #22 */
 
 // === GLOBALE VARIABLER ===
 let map;
@@ -10,16 +10,17 @@ let audioContext;
 let proximityBeepIntervalId = null; 
 let isGpsAudioEnabled = false;
 let gpsAudioVolume = 0.7; 
-let positionWatchId = null;      // For piping (kan fjernes hvis vi kun bruker mapPositionWatchId)
-let mapPositionWatchId = null;   // For kartmarkør-oppdatering og piping
+let positionWatchId = null;      
+let mapPositionWatchId = null;   
 let previousDistanceToTarget = null;
 let finishMarker = null;
 
 // === GLOBAL KONFIGURASJON ===
 const TOTAL_POSTS = 8; 
+
 const POST_LOCATIONS = [ 
-    { lat: 60.796027992133574, lng: 10.67070067570614, title: "Post 1", name: "Ved den røde husken"}, 
-    { lat: 60.80017468739349, lng: 10.64510651928592, title: "Post 2", name: "Ved den store eika"}, 
+    { lat: 60.79604180682737, lng: 10.670735066773602, title: "Test Post 1", name: "Teststed 1 (Midlertidig)"}, // DIN TESTKOORDINAT
+    { lat: 60.79640262601723, lng: 10.670890901998973, title: "Test Post 2", name: "Teststed 2 (Midlertidig)"}, // DIN TESTKOORDINAT
     { lat: 60.80072782302861, lng: 10.644889579638045, title: "Post 3", name: "På den lengste benken"}, 
     { lat: 60.80048329479234, lng: 10.643492818098643, title: "Post 4", name: "Ved informasjonstavlen"}, 
     { lat: 60.80045228531585, lng: 10.642988549931982, title: "Post 5", name: "Ved flaggstangen"}, 
@@ -50,9 +51,7 @@ window.initMap = function() {
         updateMapMarker(null, true); 
     }
     
-    // Start kontinuerlig posisjonsoppdatering for kartet hvis et spill er i gang eller GPS-lyd er på
-    // Dette vil også vise brukerens posisjon første gang.
-    if (currentTeamData || isGpsAudioEnabled) { // isGpsAudioEnabled sjekkes også i setupGpsAudioControls
+    if (currentTeamData || isGpsAudioEnabled) { 
         startContinuousUserPositionUpdate();
     }
     console.log("Google Map initialisert via window.initMap");
@@ -73,7 +72,6 @@ function updateMapMarker(postGlobalId, isFinalTarget = false) {
         });
     } else { 
         if (!postGlobalId || postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { 
-            // console.error("Ugyldig post ID for kartmarkør:", postGlobalId); // Kan skje hvis currentTeamData ikke er klar
             return; 
         } 
         location = POST_LOCATIONS[postGlobalId - 1]; 
@@ -84,7 +82,7 @@ function updateMapMarker(postGlobalId, isFinalTarget = false) {
             animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } 
         }); 
     } 
-    if(location) { // Sørg for at location er definert
+    if(location) {
         map.panTo({ lat: location.lat, lng: location.lng }); 
         if (map.getZoom() < 17) map.setZoom(17); 
     }
@@ -96,7 +94,7 @@ function handleGeolocationError(error) { let msg = "Posisjonsfeil: "; switch (er
 // === GPS AUDIO HJELP & KARTPOSISJON FUNKSJONER ===
 function initializeAudioContext() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } }
 function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume, type = 'sine') { 
-    if (!audioContext || !isGpsAudioEnabled) return; // Pip kun hvis GPS lyd er på
+    if (!audioContext || !isGpsAudioEnabled) return;
     const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain();
     oscillator.connect(gainNode); gainNode.connect(audioContext.destination);
     oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
@@ -118,15 +116,13 @@ function updateUserPositionOnMap(position) {
         });
     }
 }
-
-function handlePositionUpdate(position) { // Felles handler for watchPosition
+function handlePositionUpdate(position) { 
     updateUserPositionOnMap(position); 
-    if (isGpsAudioEnabled) { // Pip kun hvis aktivert
+    if (isGpsAudioEnabled) { 
         updateProximityBeepsLogic(position);
     }
 }
-
-function updateProximityBeepsLogic(position) { // Selve logikken for piping
+function updateProximityBeepsLogic(position) { 
     if (!currentTeamData || currentTeamData.completedPostsCount >= TOTAL_POSTS) {
         stopProximityBeepsInterval(); previousDistanceToTarget = null; return;
     }
@@ -155,7 +151,7 @@ function updateProximityBeepsLogic(position) { // Selve logikken for piping
     if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
     if (beepInterval > 0) {
         const gpsVolSlider = document.getElementById('gps-audio-volume-slider');
-        const currentGpsSliderVolume = gpsVolSlider ? gpsVolSlider.valueAsNumber : gpsAudioVolume; // Bruk global gpsAudioVolume som fallback
+        const currentGpsSliderVolume = gpsVolSlider ? gpsVolSlider.valueAsNumber : gpsAudioVolume;
         playBeep(finalBeepFrequency, beepDuration, currentGpsSliderVolume, beepType);
         proximityBeepIntervalId = setInterval(() => {
             const updatedGpsSliderVolume = gpsVolSlider ? gpsVolSlider.valueAsNumber : gpsAudioVolume;
@@ -164,11 +160,9 @@ function updateProximityBeepsLogic(position) { // Selve logikken for piping
     }
     previousDistanceToTarget = currentDistance;
 }
-
 function stopProximityBeepsInterval() { 
     if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
 }
-
 function startContinuousUserPositionUpdate() {
     const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button');
     if (!navigator.geolocation) { 
@@ -183,7 +177,7 @@ function startContinuousUserPositionUpdate() {
     console.log("Starter kontinuerlig GPS posisjonssporing for kart og pip.");
     previousDistanceToTarget = null; 
     mapPositionWatchId = navigator.geolocation.watchPosition(
-        handlePositionUpdate, // Felles handler
+        handlePositionUpdate, 
         (error) => { 
             handleGeolocationError(error); 
             stopContinuousUserPositionUpdate(); 
@@ -203,7 +197,6 @@ function stopContinuousUserPositionUpdate() {
     }
     previousDistanceToTarget = null; 
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     const teamCodeInput = document.getElementById('team-code-input');
@@ -238,27 +231,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function setupGpsAudioControls() {
-        if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) {
-            console.warn("GPS lydkontroll-elementer mangler.");
-            const gpsControlsDiv = document.getElementById('gps-audio-controls');
-            if(gpsControlsDiv) gpsControlsDiv.style.display = 'none';
-            return;
-        }
+        if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) { console.warn("GPS lydkontroll-elementer mangler."); const gpsControlsDiv = document.getElementById('gps-audio-controls'); if(gpsControlsDiv) gpsControlsDiv.style.display = 'none'; return; }
         const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true';
         const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume');
         isGpsAudioEnabled = savedGpsAudioEnabled; 
-        if (savedGpsAudioVolume !== null) { 
-            gpsAudioVolume = parseFloat(savedGpsAudioVolume); 
-            gpsAudioVolumeSlider.value = gpsAudioVolume; 
-        } else { 
-            gpsAudioVolumeSlider.value = gpsAudioVolume; 
-        }
+        if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } 
+        else { gpsAudioVolumeSlider.value = gpsAudioVolume; }
         toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
-        
         if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { 
             startContinuousUserPositionUpdate(); 
         }
-        
         toggleGpsAudioButton.addEventListener('click', () => {
             isGpsAudioEnabled = !isGpsAudioEnabled;
             toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
@@ -326,8 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUIAfterLoad(); 
         if(currentTeamData) {
             console.log(`Gjenopprettet tilstand for Team ${currentTeamData.name}.`);
-            if (isGpsAudioEnabled && currentTeamData.completedPostsCount < TOTAL_POSTS && typeof google !== 'undefined' && google.maps && map) { 
-                startContinuousUserPositionUpdate();
+            // Start GPS sporing hvis det er lagret at den skal være på, ELLER hvis et spill er i gang og sporing ikke allerede kjører
+            if (isGpsAudioEnabled || (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS && !mapPositionWatchId)) {
+                 if (typeof google !== 'undefined' && google.maps && map) { // Sjekk at kartet er klart
+                    startContinuousUserPositionUpdate();
+                }
             }
         }
     } else {
