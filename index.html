@@ -1,11 +1,13 @@
-<!-- Version: #10 -->
+<!-- Version: #9 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rebusløp for Barnebursdag - AUDIO TEST</title>
+    <title>Rebusløp for Barnebursdag</title>
     <link rel="stylesheet" href="style.css">
+    <!-- For 'Luckiest Guy' fonten, hvis du ønsker å bruke den fra Google Fonts -->
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet"> -->
 </head>
 <body>
 
@@ -22,61 +24,178 @@
 
             <!-- INTRODUKSJONSSIDE -->
             <div id="intro-page" class="page visible">
-                <h1>Velkommen til Rebusløpet! - AUDIO TEST</h1>
+                <h1>Velkommen til Rebusløpet!</h1>
                 <p>Skriv inn lagkoden deres for å starte:</p>
-                <input type="text" id="team-code-input" placeholder="Lagkode (f.eks. SKIPPER)">
+                <input type="text" id="team-code-input" placeholder="Lagkode">
                 <button id="start-with-team-code-button">Start med Lagkode</button>
                 <div class="feedback" id="team-code-feedback"></div>
             </div>
 
-            <!-- POST 1: Telleoppgave (Innholdet her er mindre viktig for denne testen) -->
+            <!-- POST 1: Telleoppgave -->
             <div id="post-1-page" class="page">
                  <h2>Post 1: Telle-Tornado 🌪️</h2>
                  <p>
-                     Audio test pågår.
+                     Finn veien til <strong>den røde husken på lekeplassen</strong>.
                  </p>
-                 <input type="text" id="post-1-input" placeholder="Skriv antall kjettinger" value="4">
+                 <p>
+                     <b>Oppdrag:</b> Hvor mange kjettinger har den røde husken totalt? (Tell nøye på alle setene, både venstre og høyre side).
+                 </p>
+                 <input type="text" id="post-1-input" placeholder="Skriv antall kjettinger">
                  <button class="check-answer-btn" data-post="1">Sjekk svar</button>
                  <div class="feedback" id="feedback-1"></div>
                  <button class="dev-reset-button">Tilbake til Start (Test)</button>
              </div>
 
-            <!-- POST 2 (Skjult for enkelhet under test) -->
-            <div id="post-2-page" class="page" style="display:none;"></div>
-            <!-- POST 3 (Skjult for enkelhet under test) -->
-            <div id="post-3-page" class="page" style="display:none;"></div>
-            <!-- POST 4 (Skjult for enkelhet under test) -->
-            <div id="post-4-page" class="page" style="display:none;"></div>
-            <!-- POST 5 (Skjult for enkelhet under test) -->
-            <div id="post-5-page" class="page" style="display:none;"></div>
-            <!-- POST 6 (Skjult for enkelhet under test) -->
-            <div id="post-6-page" class="page" style="display:none;"></div>
-            <!-- POST 7 (Skjult for enkelhet under test) -->
-            <div id="post-7-page" class="page" style="display:none;"></div>
-            <!-- POST 8 (Skjult for enkelhet under test) -->
-            <div id="post-8-page" class="page" style="display:none;"></div>
+            <!-- POST 2: Fargejakt -->
+            <div id="post-2-page" class="page">
+                <h2>Post 2: Farge-Finneren 🎨</h2>
+                 <p>
+                     Neste stopp er <strong>ved den store eika midt på plenen</strong>.
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> Se deg godt rundt! Hvilken farge har det søppelspannet som står nærmest dette treet?
+                </p>
+                <input type="text" id="post-2-input" placeholder="Skriv fargen">
+                <button class="check-answer-btn" data-post="2">Sjekk svar</button>
+                <div class="feedback" id="feedback-2"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
 
-            <!-- FINALE (Skjult for enkelhet under test) -->
-            <div id="finale-page" class="page" style="display:none;">
+            <!-- POST 3: Bokstavrebus -->
+            <div id="post-3-page" class="page">
+                <h2>Post 3: Benke-Bokstaver 🔠</h2>
+                 <p>
+                     Gå nå til <strong>den lengste benken i parken</strong>.
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> På ryggstøtten eller setet på denne benken er det et ord eller et navn (kanskje navnet på parken eller produsenten). Finn dette ordet/navnet. Hva er den TREDJE bokstaven?
+                </p>
+                <input type="text" id="post-3-input" placeholder="Skriv den tredje bokstaven">
+                <button class="check-answer-btn" data-post="3">Sjekk svar</button>
+                <div class="feedback" id="feedback-3"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+            <!-- POST 4: Formfinne -->
+            <div id="post-4-page" class="page">
+                <h2>Post 4: Form-Forundring 🔷</h2>
+                 <p>
+                     Finn frem til <strong>informasjonstavlen nær dammen</strong>.
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> Se på kartet på informasjonstavlen. Hvilken geometrisk form (f.eks. sirkel, firkant, trekant, oval) ligner selve dammen mest på?
+                </p>
+                <input type="text" id="post-4-input" placeholder="Skriv formen">
+                <button class="check-answer-btn" data-post="4">Sjekk svar</button>
+                <div class="feedback" id="feedback-4"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+            <!-- POST 5: Antall -->
+            <div id="post-5-page" class="page">
+                <h2>Post 5: Flaggstang-Telling 🚩</h2>
+                 <p>
+                     Turen går videre til <strong>flaggstangen</strong>.
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> Hvor mange separate benker står plassert i en tydelig sirkel helt RUNDT selve flaggstangen? (Ikke tell benker som står lenger unna).
+                </p>
+                <input type="text" id="post-5-input" placeholder="Skriv antall benker">
+                <button class="check-answer-btn" data-post="5">Sjekk svar</button>
+                <div class="feedback" id="feedback-5"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+             <!-- POST 6: Skiltgåte -->
+             <div id="post-6-page" class="page">
+                <h2>Post 6: Skilt-Speideren 🚧</h2>
+                 <p>
+                     Sett kursen mot <strong>sykkelstativet</strong>.
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> Det skal være et blått, firkantet skilt på eller like ved sykkelstativet. Hvilket hvitt symbol er øverst på dette skiltet?
+                </p>
+                <input type="text" id="post-6-input" placeholder="Skriv navnet på symbolet">
+                <button class="check-answer-btn" data-post="6">Sjekk svar</button>
+                <div class="feedback" id="feedback-6"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+             <!-- POST 7: Materialmysterium -->
+             <div id="post-7-page" class="page">
+                <h2>Post 7: Material-Mysteriet 🧱</h2>
+                 <p>
+                     Neste mål er <strong>steinmuren eller det solide gjerdet</strong> (det som er mest tydelig i området).
+                 </p>
+                <p>
+                   <b>Oppdrag:</b> Hovedmaterialet i denne muren/gjerdet er stein. Men se nøye etter! Det er ofte brukt et annet materiale for å binde steinene sammen, eller som en kant på toppen. Hva heter dette andre materialet? (F.eks. tre, metall, sement).
+                </p>
+                <input type="text" id="post-7-input" placeholder="Skriv materialnavnet">
+                <button class="check-answer-btn" data-post="7">Sjekk svar</button>
+                <div class="feedback" id="feedback-7"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+             <!-- POST 8: Retningsgåte -->
+             <div id="post-8-page" class="page">
+                <h2>Post 8: Retnings-Rabalder 🧭</h2>
+                 <p>
+                     Gå til <strong>hovedinngangen til området</strong> (der hvor bilveien/parkeringsplassen slutter og parken/turområdet starter).
+                 </p>
+                <p>
+                    <b>Oppdrag:</b> Stå med ryggen til parkeringsplassen/bilveien og se innover i området. Er lekeplassen på din HØYRE eller VENSTRE side?
+                </p>
+                <input type="text" id="post-8-input" placeholder="Skriv HØYRE eller VENSTRE">
+                <button class="check-answer-btn" data-post="8">Sjekk svar</button>
+                <div class="feedback" id="feedback-8"></div>
+                <button class="dev-reset-button">Tilbake til Start (Test)</button>
+            </div>
+
+            <!-- FINALE -->
+            <div id="finale-page" class="page">
                 <h1>FANTASTISK JOBBET! 🎉</h1>
+                <h2>Alle 8 kodeord er funnet!</h2>
+                <p>
+                    Dere har vist supert samarbeid og skarpe hjerner! 🧠💡
+                </p>
+                <p>
+                   Nå er rebusløpet fullført! Gå til samlingspunktet som de voksne har bestemt for en velfortjent premie og feiring!
+                </p>
+                <h2>Godt jobbet, super-agenter! 👍</h2>
+                <button class="dev-reset-button" style="margin-top: 30px;">Start helt på nytt (Test)</button>
             </div>
 
         </div> <!-- Slutt på rebus-content -->
 
-        <!-- Innhold for Kart (Skjult for enkelhet under test) -->
-        <div id="map-content" class="tab-content" style="display:none;">
+        <!-- Innhold for Kart (MED DIN EMBED-KODE) -->
+        <div id="map-content" class="tab-content">
             <h2>Kart over området</h2>
+            <p>Bruk dette interaktive kartet for å finne frem. Du kan zoome og flytte på det!</p>
+            
+            <div id="google-map-container">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1528.8390196109551!2d10.64472518698282!3d60.80025412557211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sno!2sno!4v1746863340505!5m2!1sno!2sno" 
+                    width="600" 
+                    height="450" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+             
+            <p style="font-size: 0.9em; margin-top: 15px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
         </div>
 
     </div> <!-- Slutt på container -->
 
-    <!-- Bakgrunnsmusikk Spiller - KUN MED test_music.mp3 -->
+    <!-- Bakgrunnsmusikk Spiller -->
     <audio id="background-audio" loop preload="auto">
-        <source src="audio/test_music.mp3" type="audio/mpeg">
-        <!-- Ingen OGG-kilde i denne test-versjonen for å isolere MP3-problemet -->
+        <source src="audio/background_music.mp3" type="audio/mpeg">
+        <source src="audio/background_music.ogg" type="audio/ogg">
         Nettleseren din støtter ikke audio-elementet for bakgrunnsmusikk.
     </audio>
-    <!-- Sørg for at audio/test_music.mp3 finnes! -->
+    <!-- Sørg for at audio/background_music.mp3 (og evt. .ogg) finnes! -->
 
     <div id="music-controls">
         <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
@@ -87,4 +206,4 @@
     <script src="script.js"></script>
 </body>
 </html>
-<!-- Version: #10 -->
+<!-- Version: #9 -->
