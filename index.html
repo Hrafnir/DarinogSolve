@@ -1,4 +1,4 @@
-<!-- Version: #9 -->
+<!-- Version: #11 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -167,22 +167,14 @@
 
         </div> <!-- Slutt på rebus-content -->
 
-        <!-- Innhold for Kart (MED DIN EMBED-KODE) -->
+        <!-- Innhold for Kart (MODIFISERT FOR GOOGLE MAPS JAVASCRIPT API) -->
         <div id="map-content" class="tab-content">
             <h2>Kart over området</h2>
-            <p>Bruk dette interaktive kartet for å finne frem. Du kan zoome og flytte på det!</p>
+            <p>Bruk dette interaktive kartet for å finne frem. Neste post vil bli markert!</p>
             
-            <div id="google-map-container">
-                <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1528.8390196109551!2d10.64472518698282!3d60.80025412557211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sno!2sno!4v1746863340505!5m2!1sno!2sno" 
-                    width="600" 
-                    height="450" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-            </div>
+            <!-- Den gamle iframe-containeren er erstattet med en enkel div for kartet -->
+            <div id="dynamic-map-container"></div> 
+            <!-- JavaScript API vil fylle denne diven med kartet -->
              
             <p style="font-size: 0.9em; margin-top: 15px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
         </div>
@@ -195,7 +187,6 @@
         <source src="audio/background_music.ogg" type="audio/ogg">
         Nettleseren din støtter ikke audio-elementet for bakgrunnsmusikk.
     </audio>
-    <!-- Sørg for at audio/background_music.mp3 (og evt. .ogg) finnes! -->
 
     <div id="music-controls">
         <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
@@ -204,6 +195,15 @@
     </div>
 
     <script src="script.js"></script>
+    
+    <!-- Google Maps JavaScript API Script -->
+    <!-- VIKTIG: Erstatt 'DIN_API_NØKKEL_HER' med din faktiske API-nøkkel -->
+    <!-- 'async defer' sørger for at skriptet lastes asynkront og ikke blokkerer resten av siden -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA5qUjSj9WyUKsZPljvHfp9RHd-dUjMblk&callback=initMap">
+    </script>
+    <!-- 'callback=initMap' forteller API-et at det skal kjøre funksjonen 'initMap' (som vi definerer i script.js) når API-et er fullt lastet -->
+
 </body>
 </html>
-<!-- Version: #9 -->
+<!-- Version: #11 -->
