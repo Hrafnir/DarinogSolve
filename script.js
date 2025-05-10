@@ -1,4 +1,4 @@
-/* Version: #3 */
+/* Version: #6 */
 document.addEventListener('DOMContentLoaded', () => {
     // === HTML ELEMENT REFERENCES ===
     const teamCodeInput = document.getElementById('team-code-input');
@@ -7,12 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const startSound = document.getElementById('start-sound');
 
     const pages = document.querySelectorAll('#rebus-content .page');
-    // feedbackDivs er ikke lenger nødvendig å hente her, da vi henter spesifikk feedback div i check-handler
     const checkButtons = document.querySelectorAll('.check-answer-btn');
     const allInputs = document.querySelectorAll('input[type="text"]');
 
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
+
+    const devResetButtons = document.querySelectorAll('.dev-reset-button'); // Hent alle reset-knapper
 
     // === CONFIGURATION ===
     const TOTAL_POSTS = 8;
@@ -24,17 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
         "MENIG": { name: "Team Menig", startPostId: "post-7-page", postSequence: [7, 8, 1, 2, 3, 4, 5, 6] }
     };
 
-    // Definer korrekte kodeord for hver post (NYE SVAR)
-    // HUSK: Disse må tilpasses det faktiske stedet!
     const CORRECT_CODES = {
-        post1: "4",         // Antall kjettinger på rød huske (Eksempel)
-        post2: "GRØNN",     // Farge på nærmeste søppelspann ved eika (Eksempel)
-        post3: "R",         // Tredje bokstav i ord på benk (Eksempel, for "PARKVERN")
-        post4: "OVAL",      // Form på dammen på kartet (Eksempel)
-        post5: "3",         // Antall benker rundt flaggstang (Eksempel)
-        post6: "SYKKEL",    // Symbol øverst på blått skilt ved sykkelstativ (Eksempel)
-        post7: "SEMENT",    // Annet materiale i steinmur (Eksempel)
-        post8: "VENSTRE"    // Retning til lekeplass fra inngang (Eksempel)
+        post1: "4",
+        post2: "GRØNN",
+        post3: "R",
+        post4: "OVAL",
+        post5: "3",
+        post6: "SYKKEL",
+        post7: "SEMENT",
+        post8: "VENSTRE"
     };
 
     // === STATE VARIABLES ===
@@ -53,10 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (container) {
                  window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' });
             }
+             // Når vi bytter side, må vi også sørge for at inputfelt og knapper er i riktig tilstand
+            resetPageUI(pageId);
         } else {
             console.error("Kunne ikke finne rebus-side med ID:", pageId);
-            // Fallback til intro hvis noe er galt med lagret state eller logikk
-            clearState(); // Tøm ødelagt state
+            clearState();
             showRebusPage('intro-page');
         }
     }
@@ -82,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveState() {
         if (currentTeamData) {
             localStorage.setItem('activeTeamData', JSON.stringify(currentTeamData));
+        } else {
+            localStorage.removeItem('activeTeamData'); // Sørg for å fjerne hvis currentTeamData er null
         }
     }
 
@@ -90,10 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedData) {
             try {
                 currentTeamData = JSON.parse(savedData);
-                // Validering av lastet state (enkelt eksempel)
                 if (!currentTeamData || typeof currentTeamData.completedPostsCount === 'undefined' || !currentTeamData.postSequence) {
                     console.warn("Ugyldig lagret state, tømmer.");
-                    clearState();
+                    clearState(); // clearState vil også sette currentTeamData til null
                     return false;
                 }
                 return true;
@@ -103,13 +104,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
         }
+        currentTeamData = null; // Sørg for at den er null hvis ingen savedData
         return false;
     }
 
     function clearState() {
         localStorage.removeItem('activeTeamData');
         currentTeamData = null;
+        // Når state tømmes, må vi også resette UI for alle poster
+        resetAllPostUIs();
     }
+    
+    function resetPageUI(pageId) {
+        if (pageId === 'intro-page' || pageId === 'finale-page') return; // Ingen input/knapper å resette her på samme måte
+
+        const postNumberMatch = pageId.match(/post-(\d+)-page/);
+        if (!postNumberMatch) return;
+        const postNumberGlobal = postNumberMatch[1];
+
+        const inputElement = document.getElementById(`post-${postNumberGlobal}-input`);
+        const buttonElement = document.querySelector(`.check-answer-btn[data-post="${postNumberGlobal}"]`);
+        const feedbackElement = document.getElementById(`feedback-${postNumberGlobal}`);
+
+        // Hvis det ikke er lagdata, eller denne posten ikke er fullført av laget, aktiver input/knapp
+        const isCompletedByTeam = currentTeamData && currentTeamData.completedGlobalPosts && currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`];
+
+        if (inputElement) {
+            inputElement.disabled = !!isCompletedByTeam; // Dobbel not for å sikre boolean
+            if (!isCompletedByTeam) inputElement.value = ''; // Tøm input hvis ikke fullført
+        }
+        if (buttonElement) {
+            buttonElement.disabled = !!isCompletedByTeam;
+        }
+        if (feedbackElement) {
+            if (isCompletedByTeam) {
+                feedbackElement.textContent = 'Denne posten er fullført!';
+                feedbackElement.className = 'feedback success';
+            } else {
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'feedback';
+            }
+        }
+    }
+    
+    function resetAllPostUIs() {
+        for (let i = 1; i <= TOTAL_POSTS; i++) {
+            const inputElement = document.getElementById(`post-${i}-input`);
+            const buttonElement = document.querySelector(`.check-answer-btn[data-post="${i}"]`);
+            const feedbackElement = document.getElementById(`feedback-${i}`);
+
+            if (inputElement) {
+                inputElement.disabled = false;
+                inputElement.value = '';
+            }
+            if (buttonElement) {
+                buttonElement.disabled = false;
+            }
+            if (feedbackElement) {
+                feedbackElement.textContent = '';
+                feedbackElement.className = 'feedback';
+            }
+        }
+        // Tøm også lagkode-input og feedback
+        if(teamCodeInput) teamCodeInput.value = '';
+        if(teamCodeFeedback) {
+            teamCodeFeedback.textContent = '';
+            teamCodeFeedback.className = 'feedback';
+        }
+    }
+
 
     function initializeTeam(teamCode) {
         const teamKey = teamCode.trim().toUpperCase();
@@ -124,17 +187,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 id: teamKey,
                 currentPostArrayIndex: 0,
                 completedPostsCount: 0,
-                // For å holde styr på hvilke globale poster som er fullført (for UI-deaktivering)
-                completedGlobalPosts: {} // f.eks. { "post1": true, "post3": true }
+                completedGlobalPosts: {}
             };
             saveState();
+            resetAllPostUIs(); // Sørg for at alle UIer er resatt før vi starter et nytt lag
 
             if (startSound) {
                 startSound.play().catch(e => console.warn("Kunne ikke spille startlyd:", e));
             }
             
             const firstPostInSequence = currentTeamData.postSequence[0];
-            showRebusPage(`post-${firstPostInSequence}-page`);
+            showRebusPage(`post-${firstPostInSequence}-page`); // resetPageUI vil bli kalt inni her
             console.log(`Team ${currentTeamData.name} startet! Første post: post-${firstPostInSequence}-page`);
         } else {
             teamCodeFeedback.textContent = 'Ugyldig lagkode. Prøv igjen!';
@@ -154,32 +217,30 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Merk denne globale posten som fullført for laget
-        currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`] = true;
-        
-        // Kun øk completedPostsCount hvis denne posten ikke allerede var talt med
-        // (Dette er en ekstra sjekk, burde ikke skje med disabled knapper, men greit for robusthet)
-        let alreadyCounted = false;
-        const postIndexInSequence = currentTeamData.postSequence.indexOf(parseInt(postNumberGlobal));
-        if (postIndexInSequence < currentTeamData.currentPostArrayIndex) {
-            alreadyCounted = true; // Denne posten var tidligere i sekvensen enn den vi "forventet"
-        }
-
-        if (!alreadyCounted) {
+        // Bare oppdater hvis denne posten ikke allerede var fullført og talt
+        if (!currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`]) {
+            currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`] = true;
             currentTeamData.completedPostsCount++;
         }
         
-        // Vi går alltid til neste post i sekvensen, selv om de skulle ha klart en "senere" post
-        // Dette er fordi currentPostArrayIndex styrer progresjonen gjennom lagets definerte rekkefølge.
-        currentTeamData.currentPostArrayIndex++;
+        currentTeamData.currentPostArrayIndex++; // Gå til neste indeks i lagets sekvens
         saveState();
 
         if (currentTeamData.completedPostsCount < TOTAL_POSTS) {
-            const nextPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
-            setTimeout(() => {
-                showRebusPage(`post-${nextPostGlobalId}-page`);
-                // TODO: Kartoppdatering
-            }, 1200);
+            // Sjekk om vi har en gyldig neste post i sekvensen
+            if (currentTeamData.currentPostArrayIndex < currentTeamData.postSequence.length) {
+                const nextPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
+                setTimeout(() => {
+                    showRebusPage(`post-${nextPostGlobalId}-page`);
+                }, 1200);
+            } else {
+                // Dette skal egentlig ikke skje hvis completedPostsCount < TOTAL_POSTS,
+                // men som en fallback hvis sekvensen er kortere enn TOTAL_POSTS.
+                console.warn("Fullført færre enn TOTAL_POSTS, men ingen flere poster i sekvensen. Viser finale.");
+                setTimeout(() => {
+                    showRebusPage('finale-page');
+                }, 1200);
+            }
         } else {
             setTimeout(() => {
                 showRebusPage('finale-page');
@@ -188,22 +249,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateUIAfterLoad() {
-        if (!currentTeamData) return;
+        if (!currentTeamData || !currentTeamData.completedGlobalPosts) {
+            resetAllPostUIs(); // Hvis ingen lagdata, eller manglende data, resettes alt.
+            return;
+        }
+        // Gå gjennom alle poster og sett UI basert på lagret tilstand
+        for (let i = 1; i <= TOTAL_POSTS; i++) {
+            const postKey = `post${i}`;
+            const inputElement = document.getElementById(`post-${i}-input`);
+            const buttonElement = document.querySelector(`.check-answer-btn[data-post="${i}"]`);
+            const feedbackElement = document.getElementById(`feedback-${i}`);
+            
+            const isCompleted = currentTeamData.completedGlobalPosts[postKey];
 
-        // Deaktiver input/knapper for allerede fullførte poster
-        Object.keys(currentTeamData.completedGlobalPosts || {}).forEach(completedPostKey => { // post1, post2 etc.
-            const globalPostNum = completedPostKey.replace('post', ''); // "1", "2"
-            const inputElement = document.getElementById(`post-${globalPostNum}-input`);
-            const buttonElement = document.querySelector(`.check-answer-btn[data-post="${globalPostNum}"]`);
-            const feedbackElement = document.getElementById(`feedback-${globalPostNum}`);
-
-            if (inputElement) inputElement.disabled = true;
-            if (buttonElement) buttonElement.disabled = true;
-            if (feedbackElement && currentTeamData.completedGlobalPosts[completedPostKey]) {
-                feedbackElement.textContent = 'Denne posten er fullført!';
-                feedbackElement.className = 'feedback success'; // Vis suksess
+            if (inputElement) inputElement.disabled = !!isCompleted;
+            if (buttonElement) buttonElement.disabled = !!isCompleted;
+            if (feedbackElement) {
+                if (isCompleted) {
+                    feedbackElement.textContent = 'Denne posten er fullført!';
+                    feedbackElement.className = 'feedback success';
+                } else {
+                    feedbackElement.textContent = '';
+                    feedbackElement.className = 'feedback';
+                }
             }
-        });
+        }
     }
 
 
@@ -309,34 +379,57 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Event listener for dev reset buttons
+    devResetButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            if (confirm("Er du sikker på at du vil nullstille og gå tilbake til start?\n(Dette er en testfunksjon)")) {
+                clearState();
+                showRebusPage('intro-page');
+                // Sørg for at lagkode-input er klar
+                if (teamCodeInput) {
+                    teamCodeInput.value = '';
+                    teamCodeInput.disabled = false;
+                }
+                if (teamCodeFeedback) {
+                    teamCodeFeedback.textContent = '';
+                    teamCodeFeedback.className = 'feedback';
+                }
+                 if (startWithTeamCodeButton) {
+                    startWithTeamCodeButton.disabled = false;
+                }
+            }
+        });
+    });
+
     // === INITIALIZATION ===
-    if (loadState() && currentTeamData) {
+    if (loadState()) { // loadState setter currentTeamData hvis data finnes
         showTabContent('rebus');
-        if (currentTeamData.completedPostsCount >= TOTAL_POSTS) {
+        if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) {
             showRebusPage('finale-page');
-        } else {
-            // Sikrer at vi viser den *forventede* neste posten i henhold til sekvensen
+        } else if (currentTeamData) {
             const currentExpectedPostId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
             if (typeof currentExpectedPostId === 'undefined') {
-                // Dette kan skje hvis currentPostArrayIndex er utenfor rekkevidde (f.eks. etter at alle poster er fullført, men før finale vises)
-                // Eller hvis postSequence er tom/ugyldig.
-                console.warn("Ugyldig currentExpectedPostId, viser finale eller intro.");
+                console.warn("Ugyldig currentExpectedPostId ved load, viser finale eller intro.");
                 if(currentTeamData.completedPostsCount >= TOTAL_POSTS) {
                     showRebusPage('finale-page');
                 } else {
-                    clearState(); // Noe er galt med state, start på nytt
+                    clearState();
                     showRebusPage('intro-page');
                 }
             } else {
                 showRebusPage(`post-${currentExpectedPostId}-page`);
             }
+        } else { // Hvis loadState returnerte true men currentTeamData av en eller annen grunn er null
+            clearState();
+            showRebusPage('intro-page');
         }
-        updateUIAfterLoad(); // Deaktiver inputs for fullførte poster
-        console.log(`Gjenopprettet tilstand for Team ${currentTeamData.name}. Fullførte: ${currentTeamData.completedPostsCount}. Neste post index: ${currentTeamData.currentPostArrayIndex}`);
+        updateUIAfterLoad();
+        if(currentTeamData) console.log(`Gjenopprettet tilstand for Team ${currentTeamData.name}. Fullførte: ${currentTeamData.completedPostsCount}. Neste post index: ${currentTeamData.currentPostArrayIndex}`);
     } else {
         showTabContent('rebus');
         showRebusPage('intro-page');
+        resetAllPostUIs(); // Sørg for at UI er ren hvis ingen state lastes
     }
 
 }); // Slutt på DOMContentLoaded
-/* Version: #3 */
+/* Version: #6 */
