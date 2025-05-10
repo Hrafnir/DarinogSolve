@@ -1,0 +1,190 @@
+<!-- Version: #1 -->
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rebusløp for Barnebursdag</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Tab Navigasjon -->
+        <div class="tabs">
+            <button class="tab-button active" data-tab="rebus">Rebus</button>
+            <button class="tab-button" data-tab="map">Kart</button>
+        </div>
+
+        <!-- Innhold for Rebus -->
+        <div id="rebus-content" class="tab-content visible">
+
+            <!-- INTRODUKSJONSSIDE (MODIFISERT FOR LAGKODE) -->
+            <div id="intro-page" class="page visible">
+                <h1>Velkommen til Rebusløpet!</h1>
+                <p>Skriv inn lagkoden deres for å starte:</p>
+                <input type="text" id="team-code-input" placeholder="Lagkode">
+                <button id="start-with-team-code-button">Start med Lagkode</button>
+                <div class="feedback" id="team-code-feedback"></div>
+                <!-- Skjult audio-element for startlyd -->
+                <audio id="start-sound" src="audio/start_sound.mp3" preload="auto"></audio>
+                <!-- Sørg for at filen audio/start_sound.mp3 finnes i en 'audio' mappe -->
+            </div>
+
+            <!-- POST 1 -->
+            <div id="post-1-page" class="page">
+                 <h2>Post 1: Opprop for Uniformer ✍️</h2>
+                 <p>
+                     Først, finn veien til <strong>Skateparken</strong>.
+                 </p>
+                 <p>
+                     Der venter en voksen (eller en post-ansvarlig). Få et oppropsark og penn.
+                 </p>
+                 <p>
+                     <b>Oppdrag:</b> Få fem ulike personer (utenfor laget) til å skrive under på et opprop for rosa skoleuniformer.
+                 </p>
+                  <p>
+                     Når dere har 5 underskrifter, vis det til den voksne. De vil gi dere kodeordet.
+                 </p>
+                 <input type="text" id="post-1-input" placeholder="Skriv kodeordet">
+                 <button class="check-answer-btn" data-post="1">Sjekk svar</button>
+                 <div class="feedback" id="feedback-1"></div>
+             </div>
+
+            <!-- POST 2 -->
+            <div id="post-2-page" class="page">
+                <h2>Post 2: Jakten på Ordet 🤔</h2>
+                 <p>
+                     Neste stopp er <strong>Mjøspromenaden (Strandpromenaden)</strong>.
+                 </p>
+                <p>
+                    Finn en voksen (eller post-ansvarlig) her. De har gjemt unna det neste kodeordet. Spør dem pent!
+                </p>
+                <input type="text" id="post-2-input" placeholder="Skriv kodeordet">
+                <button class="check-answer-btn" data-post="2">Sjekk svar</button>
+                <div class="feedback" id="feedback-2"></div>
+            </div>
+
+            <!-- POST 3 -->
+            <div id="post-3-page" class="page">
+                <h2>Post 3: Lytt og Løs 🎧</h2>
+                 <p>
+                     Gå nå til <strong>Skibladner-kaia</strong>.
+                 </p>
+                <p>
+                    Spill av lydfilen under for å få dagens oppgave. Skriv inn svaret du finner i feltet under.
+                    (Hvis lyden ikke virker, spør en voksen. Oppgaven er: Hva er 7 x 9?)
+                </p>
+                <audio controls style="margin-top: 10px; margin-bottom: 20px; width: 100%;">
+                    <source src="audio/oppgave_post3.mp3" type="audio/mpeg">
+                    <!-- Sørg for at filen audio/oppgave_post3.mp3 finnes! -->
+                    Nettleseren din støtter ikke denne lydtypen. Spør en voksen. Oppgaven er: Hva er 7 x 9?
+                </audio>
+                <input type="text" id="post-3-input" placeholder="Skriv svaret fra lydfilen">
+                <button class="check-answer-btn" data-post="3">Sjekk svar</button>
+                <div class="feedback" id="feedback-3"></div>
+            </div>
+
+            <!-- POST 4 -->
+            <div id="post-4-page" class="page">
+                <h2>Post 4: Bokstavmysteriet 🔡</h2>
+                 <p>
+                     Finn frem til <strong>Gjøvik kulturhus</strong>.
+                 </p>
+                <p>
+                    Der skal dere finne neste bokstav i denne sekvensen:
+                    <br> B, D, G, K, ... (Hint: Tenk på tastaturet, og hopp over en tast mellom hver bokstav på øverste rad fra venstre)
+                </p>
+                <input type="text" id="post-4-input" placeholder="Skriv neste bokstav">
+                <button class="check-answer-btn" data-post="4">Sjekk svar</button>
+                <div class="feedback" id="feedback-4"></div>
+            </div>
+
+            <!-- POST 5 -->
+            <div id="post-5-page" class="page">
+                <h2>Post 5: Sifferlogikk 🔢</h2>
+                 <p>
+                     Turen går videre til <strong>Gjøvik kirke</strong>.
+                 </p>
+                <p>
+                    Jeg er et tresifret tall. Tiersifferet mitt er dobbelt så stort som enersifferet. Hundrersifferet er 3 mindre enn tiersifferet. Summen av sifrene mine er 12. Hvilket tall er jeg?
+                </p>
+                <input type="text" id="post-5-input" placeholder="Skriv tallet">
+                <button class="check-answer-btn" data-post="5">Sjekk svar</button>
+                <div class="feedback" id="feedback-5"></div>
+            </div>
+
+             <!-- POST 6 -->
+             <div id="post-6-page" class="page">
+                <h2>Post 6: Enkel Regning 🧮</h2>
+                 <p>
+                     Sett kursen mot <strong>Vitensenteret Innlandet</strong>.
+                 </p>
+                <p>
+                    Løs regnestykket: (5 x 5) + 10 - 5 = ?
+                </p>
+                <input type="text" id="post-6-input" placeholder="Skriv svaret">
+                <button class="check-answer-btn" data-post="6">Sjekk svar</button>
+                <div class="feedback" id="feedback-6"></div>
+            </div>
+
+             <!-- POST 7 -->
+             <div id="post-7-page" class="page">
+                <h2>Post 7: Ordbokstriks ☕</h2>
+                 <p>
+                     Neste mål er <strong>Kauffeldtgården</strong>.
+                 </p>
+                <p>
+                   Hvilket ord på 5 bokstaver blir kortere når du legger til to bokstaver på slutten? (Hint: Tenk engelsk)
+                </p>
+                <input type="text" id="post-7-input" placeholder="Skriv ordet (engelsk)">
+                <button class="check-answer-btn" data-post="7">Sjekk svar</button>
+                <div class="feedback" id="feedback-7"></div>
+            </div>
+
+             <!-- POST 8 -->
+             <div id="post-8-page" class="page">
+                <h2>Post 8: Speilvendt  зеркало</h2>
+                 <p>
+                     Gå til <strong>Gjøvik Gård</strong>.
+                 </p>
+                <p>
+                    Hva er det som alltid kommer, men aldri ankommer?
+                </p>
+                <input type="text" id="post-8-input" placeholder="Skriv løsningsordet">
+                <button class="check-answer-btn" data-post="8">Sjekk svar</button>
+                <div class="feedback" id="feedback-8"></div>
+            </div>
+
+            <!-- FINALE (OPPDATERT FOR 8 POSTER) -->
+            <div id="finale-page" class="page">
+                <h1>FANTASTISK JOBBET! 🎉</h1>
+                <h2>Alle 8 kodeord er funnet!</h2>
+                <p>
+                    Dere har vist supert samarbeid og skarpe hjerner! 🧠💡
+                </p>
+                <p>
+                   Nå er rebusløpet fullført! Gå til samlingspunktet som de voksne har bestemt for en velfortjent premie og feiring!
+                </p>
+                <h2>Godt jobbet, super-agenter! 👍</h2>
+            </div>
+
+        </div> <!-- Slutt på rebus-content -->
+
+        <!-- Innhold for Kart -->
+        <div id="map-content" class="tab-content">
+            <h2>Kart over området</h2>
+            <p>Bruk dette kartet for å finne frem til postene.</p>
+            <!-- TODO: Legg til dynamisk kartmarkering her senere -->
+            <img src="images/kart_gjovik_sentrum_rebus.png" alt="Kart over rebusløp-området Gjøvik sentrum" style="max-width: 100%; height: auto; border: 1px solid #ccc; margin-top: 15px;">
+            <p style="font-size: 0.9em; margin-top: 10px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
+            <p style="font-size: 0.8em; margin-top: 5px;">Kart laget med Felt.com</p>
+        </div>
+
+    </div> <!-- Slutt på container -->
+
+    <script src="script.js"></script>
+</body>
+</html>
+<!-- Version: #1 -->
