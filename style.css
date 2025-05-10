@@ -1,0 +1,325 @@
+/* Version: #2 */
+/* === GENERELLE STILER === */
+body {
+    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* En mer leken, avrundet font */
+    background-color: #FFDAB9; /* Lys fersken/sandfarge bakgrunn */
+    color: #5D4037; /* Mørk brun tekst for god kontrast */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23E6A465' fill-opacity='0.2'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); /* Subtil mønster */
+}
+
+.container {
+    background-color: #FFF8DC; /* Korngul/pergament-aktig farge */
+    padding: 25px 30px;
+    border-radius: 20px; /* Mer avrundede kanter */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2), 0 0 0 5px #D2B48C; /* Skygge + "ramme" */
+    max-width: 650px;
+    width: 100%;
+    text-align: center;
+    border: 3px solid #A0522D; /* Tykkere, brun kant */
+}
+
+/* === TAB NAVIGASJON === */
+.tabs {
+    margin-bottom: 30px;
+    border-bottom: 3px dashed #A0522D; /* Stiplet linje for "skattekart"-følelse */
+    padding-bottom: 15px;
+}
+
+.tab-button {
+    background-color: #F4A460; /* Sand-oransje inaktiv */
+    color: #FFFFFF;
+    padding: 12px 25px;
+    border: 2px solid #8B4513; /* Mørk brun kant */
+    border-bottom: none;
+    border-radius: 15px 15px 0 0; /* Myke topper */
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold; /* Alltid fet skrift for tabs */
+    margin: 0 5px -3px 0; /* Justert margin for å overlappe kant */
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    position: relative;
+    bottom: -3px; /* Løft for å overlappe stiplet linje */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
+}
+
+.tab-button:hover {
+    background-color: #E9967A; /* Mørkere oransje ved hover */
+    transform: translateY(-2px); /* Liten løfteeffekt */
+}
+
+.tab-button.active {
+    background-color: #FFF8DC; /* Samme som container-bakgrunn */
+    color: #8B0000; /* Mørk rød aktiv tekst */
+    border-bottom: 3px solid #FFF8DC; /* Skjul bunnkant bedre */
+    z-index: 1; /* Sørg for at den er over andre elementer */
+    transform: translateY(0);
+}
+
+/* === TAB INNHOLD === */
+.tab-content {
+    display: none;
+    animation: fadeInContent 0.5s ease-in-out;
+}
+
+.tab-content.visible {
+    display: block;
+}
+
+@keyframes fadeInContent {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* === REBUS SIDER (PAGES) === */
+.page {
+    display: none;
+}
+
+.page.visible {
+    display: block;
+    animation: fadeInPage 0.4s ease-out;
+}
+
+@keyframes fadeInPage {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* === TYPOGRAFI === */
+h1 {
+    color: #D2691E; /* Sjokoladebrun */
+    margin-bottom: 25px;
+    font-size: 2.2em; /* Større */
+    text-shadow: 2px 2px 0px #FDF5E6, 3px 3px 0px rgba(0,0,0,0.1); /* Tekst-skygge for dybde */
+    font-family: 'Luckiest Guy', cursive, 'Arial Rounded MT Bold', sans-serif; /* Mer leken font, hvis tilgjengelig */
+}
+
+h2 {
+    color: #8B4513; /* Mørkere brun */
+    margin-top: 30px;
+    margin-bottom: 20px;
+    font-size: 1.7em; /* Større */
+    border-bottom: 2px dashed #CD853F; /* Peru-farget stiplet linje */
+    padding-bottom: 10px;
+    font-family: 'Luckiest Guy', cursive, 'Arial Rounded MT Bold', sans-serif;
+}
+
+/* Paragrafer */
+p {
+    line-height: 1.8; /* Mer luft */
+    margin-bottom: 18px;
+    font-size: 1.1em; /* Litt større for lesbarhet */
+    text-align: left;
+    color: #5D4037; /* Mørk brun tekst */
+}
+
+#intro-page p, #finale-page p, #map-content p {
+    text-align: center;
+}
+
+strong {
+    color: #FF4500; /* Oransjerød for utheving */
+    font-weight: bold; /* Sørg for at den er fet */
+}
+
+/* === INPUT-FELT === */
+input[type="text"] {
+    padding: 15px 20px;
+    margin-top: 10px;
+    border: 3px solid #CD853F; /* Peru-farget kant */
+    border-radius: 10px; /* Avrundede kanter */
+    width: calc(100% - 46px); /* Full bredde minus padding og border */
+    font-size: 1.1em;
+    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+    text-transform: uppercase;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #FFFACD; /* Lys gul bakgrunn */
+    color: #5D4037;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+input[type="text"]:focus {
+    border-color: #FF8C00; /* Mørk oransje kant ved fokus */
+    outline: 0;
+    box-shadow: 0 0 10px rgba(255, 140, 0, 0.5), inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+input[type="text"].shake {
+    animation: shakeInput 0.5s;
+}
+@keyframes shakeInput { /* Egen shake for input for mer kontroll om nødvendig */
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}
+
+/* === KNAPPER === */
+button {
+    background-color: #FF6347; /* Tomat-rød */
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px; /* Mer avrundet */
+    cursor: pointer;
+    font-size: 1.2em;
+    font-weight: bold;
+    font-family: 'Luckiest Guy', cursive, 'Arial Rounded MT Bold', sans-serif;
+    margin-top: 20px;
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 5px 0 #CD5C5C, 0 6px 10px rgba(0,0,0,0.2); /* 3D-effekt */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+button:hover {
+    background-color: #FF4500; /* Oransjerød ved hover */
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #CD5C5C, 0 8px 12px rgba(0,0,0,0.25);
+}
+button:active {
+    transform: translateY(2px); /* Trykk-ned effekt */
+    box-shadow: 0 2px 0 #CD5C5C, 0 3px 5px rgba(0,0,0,0.2);
+}
+button:disabled {
+     background-color: #BDBDBD; /* Grå ut deaktivert knapp */
+     color: #757575;
+     cursor: not-allowed;
+     box-shadow: 0 5px 0 #9E9E9E;
+     transform: translateY(0);
+}
+
+/* Unntak for tab-knapper (har egen styling) */
+.tab-button {
+     margin-top: 0;
+     box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset; /* Tilbakestill til tab-spesifikk skygge */
+     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* Standard font for tabs */
+     text-transform: none;
+     letter-spacing: normal;
+}
+.tab-button:hover {
+    /* Behold hover-effekt for tab-knapper */
+    background-color: #E9967A;
+    transform: translateY(-2px);
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset;
+}
+.tab-button.active {
+     background-color: #FFF8DC;
+     color: #8B0000;
+     box-shadow: none; /* Ingen spesiell skygge når aktiv, for å blende med bakgrunn */
+     transform: translateY(0);
+}
+.tab-button.active:hover {
+    background-color: #FFF8DC; /* Beholder farge ved hover når aktiv */
+    transform: translateY(0);
+}
+
+#start-with-team-code-button { /* Tidligere #start-button */
+    background-color: #4CAF50; /* Grønn startknapp */
+    font-size: 1.3em;
+    padding: 16px 38px;
+    box-shadow: 0 5px 0 #388E3C, 0 6px 10px rgba(0,0,0,0.2);
+}
+#start-with-team-code-button:hover {
+    background-color: #43A047; /* Mørkere grønn */
+    box-shadow: 0 7px 0 #388E3C, 0 8px 12px rgba(0,0,0,0.25);
+}
+#start-with-team-code-button:active {
+    box-shadow: 0 2px 0 #388E3C, 0 3px 5px rgba(0,0,0,0.2);
+}
+
+
+/* === TILBAKEMELDINGER (FEEDBACK) === */
+.feedback {
+    margin-top: 20px;
+    font-weight: bold;
+    min-height: 25px;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 1.05em;
+    border-width: 2px;
+    border-style: solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex; /* For å sentrere ikon og tekst */
+    align-items: center;
+    justify-content: center;
+}
+
+.feedback::before { /* Plass for ikon */
+    font-size: 1.5em;
+    margin-right: 10px;
+}
+
+.feedback.success {
+    color: #2E7D32; /* Mørk grønn tekst */
+    background-color: #C8E6C9; /* Lys grønn bakgrunn */
+    border-color: #A5D6A7;
+}
+.feedback.success::before {
+    content: "🎉"; /* Party popper for suksess */
+}
+
+.feedback.error {
+    color: #C62828; /* Mørk rød tekst */
+    background-color: #FFCDD2; /* Lys rød bakgrunn */
+    border-color: #EF9A9A;
+}
+.feedback.error::before {
+    content: "🤔"; /* Tenkende fjes for feil */
+}
+
+/* Riste-animasjon for feedback */
+.feedback.shake {
+    animation: feedbackShake 0.5s;
+}
+@keyframes feedbackShake {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  20% { transform: translateX(-6px) rotate(-2deg); }
+  40% { transform: translateX(6px) rotate(2deg); }
+  60% { transform: translateX(-4px) rotate(-1deg); }
+  80% { transform: translateX(4px) rotate(1deg); }
+}
+
+/* === KART SEKSJON === */
+#map-content img {
+    border: 4px solid #A0522D !important; /* Tykkere, mørk brun kant rundt kartet */
+    border-radius: 10px; /* Avrundede kanter på kartet */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+#map-content p {
+    font-style: italic;
+    color: #795548; /* Litt lysere brun for karttekst */
+}
+
+
+/* === LYDSPILLER === */
+audio {
+    border-radius: 25px; /* Avrundede kanter for lydspiller */
+    border: 2px solid #CD853F;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* Noen nettlesere tillater ikke mye styling av default controls, men dette er et forsøk */
+audio::-webkit-media-controls-panel {
+  background-color: #FFFACD; /* Lys gul */
+  border-radius: 25px;
+}
+audio::-webkit-media-controls-play-button,
+audio::-webkit-media-controls-mute-button,
+audio::-webkit-media-controls-timeline-container,
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display,
+audio::-webkit-media-controls-volume-slider-container {
+  /* Kan prøve å endre farger her, men støtten varierer */
+}
+
+/* For å prøve å bruke "Luckiest Guy" hvis den finnes lokalt eller lastes via @font-face (ikke inkludert her) */
+/* @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap'); */
+/* Hvis du kan legge til Google Fonts, uncomment linjen over i din HTML <head> eller her */
+
+/* Slutt på filen */
+/* Version: #2 */
