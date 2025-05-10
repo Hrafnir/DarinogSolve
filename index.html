@@ -1,4 +1,4 @@
-<!-- Version: #7 -->
+<!-- Version: #8 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -29,7 +29,7 @@
                 <input type="text" id="team-code-input" placeholder="Lagkode">
                 <button id="start-with-team-code-button">Start med Lagkode</button>
                 <div class="feedback" id="team-code-feedback"></div>
-                <audio id="start-sound" src="audio/start_sound.mp3" preload="auto"></audio>
+                <!-- <audio id="start-sound" src="audio/start_sound.mp3" preload="auto"></audio> --> <!-- FJERNET -->
             </div>
 
             <!-- POST 1: Telleoppgave -->
@@ -191,8 +191,8 @@
     </div> <!-- Slutt på container -->
 
     <!-- Bakgrunnsmusikk Spiller -->
-    <audio id="background-audio" src="audio/background_music.mp3" loop></audio>
-    <!-- Sørg for at audio/background_music.mp3 finnes! -->
+    <audio id="background-audio" src="audio/background_music.mp3" loop preload="auto"></audio>
+    <!-- Sørg for at audio/background_music.mp3 finnes! preload="auto" kan hjelpe med 'canplaythrough' -->
 
     <div id="music-controls">
         <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
@@ -203,4 +203,4 @@
     <script src="script.js"></script>
 </body>
 </html>
-<!-- Version: #7 -->
+<!-- Version: #8 -->
