@@ -1,4 +1,4 @@
-/* Version: #7 */
+/* Version: #8 */
 /* === GENERELLE STILER === */
 body {
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* En mer leken, avrundet font */
@@ -286,39 +286,33 @@ button:disabled {
   80% { transform: translateX(4px) rotate(1deg); }
 }
 
-/* === KART SEKSJON (MODIFISERT FOR IFRAME) === */
-#map-content #google-map-container {
-    margin-top: 15px; /* Litt luft over kartet */
-    margin-bottom: 15px; /* Litt luft under kartet */
+/* === KART SEKSJON (MODIFISERT FOR DYNAMISK KART) === */
+#map-content #dynamic-map-container { /* Endret fra #google-map-container */
+    margin-top: 15px;
+    margin-bottom: 15px;
+    width: 100%;
+    height: 400px; /* Gi kartet en fast høyde. Kan justeres. */
+    /* Alternativt, bruk aspect ratio-trikset hvis du foretrekker det:
     position: relative;
     overflow: hidden;
-    width: 100%;
-    padding-top: 75%; /* Aspect ratio 4:3 (kan justeres, 75% = height/width) */
-                    /* For 16:9, bruk 56.25% */
-    border: 4px solid #A0522D; /* Tykkere, mørk brun kant rundt kart-containeren */
-    border-radius: 10px; /* Avrundede kanter på kart-containeren */
+    padding-top: 75%; // For 4:3 aspect ratio 
+    */
+    border: 4px solid #A0522D;
+    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    background-color: #f0f0f0; /* En lys bakgrunnsfarge mens kartet laster */
 }
 
-#map-content #google-map-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    border: none; /* Fjern standard iframe kant, vi har på containeren */
-}
+/* Fjernet styling for iframe siden vi ikke bruker det lenger for hovedkartet */
 
-#map-content p { /* Gjelder p-taggene i map-content */
+#map-content p { 
     font-style: italic;
-    color: #795548; /* Litt lysere brun for karttekst */
+    color: #795548; 
 }
 
 
 /* === LYDSPILLER (GENERELL) === */
-audio { /* Gjelder for alle audio-elementer, inkl. start-sound hvis den vises */
+audio { 
     border-radius: 25px;
     border: 2px solid #CD853F;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -326,7 +320,7 @@ audio { /* Gjelder for alle audio-elementer, inkl. start-sound hvis den vises */
     max-width: 400px; 
     margin-left: auto; 
     margin-right: auto;
-    display: block; /* For at margin auto skal fungere hvis den er i flyten */
+    display: block; 
 }
 audio::-webkit-media-controls-panel {
   background-color: #FFFACD; 
@@ -336,16 +330,16 @@ audio::-webkit-media-controls-panel {
 
 /* === UTVIKLER/TEST KNAPP === */
 .dev-reset-button {
-    background-color: #78909C; /* Blågrå, diskret farge */
+    background-color: #78909C; 
     color: white;
-    font-size: 0.8em; /* Mindre tekst */
-    padding: 8px 15px; /* Mindre padding */
-    margin-top: 30px; /* God avstand fra annet innhold */
+    font-size: 0.8em; 
+    padding: 8px 15px; 
+    margin-top: 30px; 
     border-radius: 6px;
-    text-transform: none; /* Ikke store bokstaver */
+    text-transform: none; 
     letter-spacing: normal;
-    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* Standard font */
-    box-shadow: 0 3px 0 #546E7A, 0 4px 6px rgba(0,0,0,0.15); /* Subtil skygge */
+    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; 
+    box-shadow: 0 3px 0 #546E7A, 0 4px 6px rgba(0,0,0,0.15); 
 }
 
 .dev-reset-button:hover {
@@ -364,37 +358,37 @@ audio::-webkit-media-controls-panel {
     position: fixed;
     bottom: 10px;
     right: 10px;
-    background-color: rgba(244, 164, 96, 0.85); /* Sand-oransje med litt gjennomsiktighet */
+    background-color: rgba(244, 164, 96, 0.85); 
     padding: 8px 12px;
-    border-radius: 25px; /* Pilleform */
+    border-radius: 25px; 
     box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     display: flex;
     align-items: center;
-    gap: 8px; /* Mellomrom mellom elementene */
-    z-index: 1000; /* Sørg for at den er over annet innhold */
-    border: 2px solid #8B4513; /* Mørk brun kant, matcher tabs */
+    gap: 8px; 
+    z-index: 1000; 
+    border: 2px solid #8B4513; 
 }
 
 #music-controls button {
-    background-color: #FFF8DC; /* Korngul, matcher container */
-    color: #8B4513; /* Mørk brun tekst */
+    background-color: #FFF8DC; 
+    color: #8B4513; 
     border: 1px solid #8B4513;
-    border-radius: 50%; /* Runde knapper */
+    border-radius: 50%; 
     width: 36px;
     height: 36px;
-    padding: 0; /* Fjern padding for å sentrere ikonet bedre */
-    font-size: 1.2em; /* Størrelse på ikonet */
+    padding: 0; 
+    font-size: 1.2em; 
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 0 #D2B48C, 0 3px 5px rgba(0,0,0,0.1);
-    margin-top: 0; /* Overstyr generell knapp-margin */
+    margin-top: 0; 
     transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 #music-controls button:hover {
-    background-color: #FFFACD; /* Lysere gul */
+    background-color: #FFFACD; 
     transform: scale(1.1);
 }
 #music-controls button:active {
@@ -403,29 +397,27 @@ audio::-webkit-media-controls-panel {
 }
 
 #music-controls input[type="range"] {
-    width: 100px; /* Bredde på volumslider */
+    width: 100px; 
     height: 8px;
-    -webkit-appearance: none; /* Fjern standard utseende på webkit */
+    -webkit-appearance: none; 
     appearance: none;
-    background: #FFF8DC; /* Bakgrunn på sporet */
+    background: #FFF8DC; 
     border-radius: 5px;
     border: 1px solid #8B4513;
     cursor: pointer;
 }
 
-/* Styling for volumslider thumb (WebKit/Blink) */
 #music-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
     height: 16px;
-    background: #FF6347; /* Tomat-rød, matcher hovedknapper */
+    background: #FF6347; 
     border-radius: 50%;
     border: 1px solid #CD5C5C;
     cursor: pointer;
 }
 
-/* Styling for volumslider thumb (Mozilla) */
 #music-controls input[type="range"]::-moz-range-thumb {
     width: 14px;
     height: 14px;
@@ -437,4 +429,4 @@ audio::-webkit-media-controls-panel {
 
 
 /* Slutt på filen */
-/* Version: #7 */
+/* Version: #8 */
