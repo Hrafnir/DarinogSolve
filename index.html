@@ -1,4 +1,4 @@
-<!-- Version: #6 -->
+<!-- Version: #7 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -163,7 +163,6 @@
                    Nå er rebusløpet fullført! Gå til samlingspunktet som de voksne har bestemt for en velfortjent premie og feiring!
                 </p>
                 <h2>Godt jobbet, super-agenter! 👍</h2>
-                <!-- Kan også legge til en reset-knapp her om ønskelig for testing av finalesiden -->
                 <button class="dev-reset-button" style="margin-top: 30px;">Start helt på nytt (Test)</button>
             </div>
 
@@ -175,7 +174,6 @@
             <p>Bruk dette interaktive kartet for å finne frem. Du kan zoome og flytte på det!</p>
             
             <div id="google-map-container">
-                <!-- DIN EMBED-KODE ER SATT INN HER -->
                 <iframe 
                     src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1528.8390196109551!2d10.64472518698282!3d60.80025412557211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sno!2sno!4v1746863340505!5m2!1sno!2sno" 
                     width="600" 
@@ -192,7 +190,17 @@
 
     </div> <!-- Slutt på container -->
 
+    <!-- Bakgrunnsmusikk Spiller -->
+    <audio id="background-audio" src="audio/background_music.mp3" loop></audio>
+    <!-- Sørg for at audio/background_music.mp3 finnes! -->
+
+    <div id="music-controls">
+        <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
+        <button id="mute-unmute-button" title="Demp/Lyd på Musikk">🔊</button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" title="Volum">
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
-<!-- Version: #6 -->
+<!-- Version: #7 -->
