@@ -1,4 +1,4 @@
-/* Version: #20 */
+/* Version: #21 */
 
 // === GLOBALE VARIABLER ===
 let map;
@@ -12,37 +12,81 @@ let isGpsAudioEnabled = false;
 let gpsAudioVolume = 0.7; 
 let positionWatchId = null; 
 let previousDistanceToTarget = null;
+let finishMarker = null; // NY: For å holde på mål-markøren
 
-// === GLOBAL KONFIGURASJON (tilgjengelig for alle funksjoner) ===
-const TOTAL_POSTS = 8; // <--- FLYTTET HIT (GLOBAL)
-
-const POST_LOCATIONS = [
-    { lat: 60.8007539616181, lng: 10.646227725129991, title: "Post 1", name: "Ved den røde husken"},
-    { lat: 60.80017468739349, lng: 10.64510651928592, title: "Post 2", name: "Ved den store eika"},
-    { lat: 60.80072782302861, lng: 10.644889579638045, title: "Post 3", name: "På den lengste benken"},
-    { lat: 60.80048329479234, lng: 10.643492818098643, title: "Post 4", name: "Ved informasjonstavlen"},
-    { lat: 60.80045228531585, lng: 10.642988549931982, title: "Post 5", name: "Ved flaggstangen"},
-    { lat: 60.7998031467142, lng: 10.643149576741504, title: "Post 6", name: "Ved sykkelstativet"},
-    { lat: 60.7990979034987, lng: 10.64366234869697, title: "Post 7", name: "Ved steinmuren"},
-    { lat: 60.79974498905187, lng: 10.64269195029222, title: "Post 8", name: "Ved hovedinngangen til området"}
+// === GLOBAL KONFIGURASJON ===
+const TOTAL_POSTS = 8; 
+const POST_LOCATIONS = [ /* ... (som før) ... */ 
+    { lat: 60.8007539616181, lng: 10.646227725129991, title: "Post 1", name: "Ved den røde husken"}, { lat: 60.80017468739349, lng: 10.64510651928592, title: "Post 2", name: "Ved den store eika"}, { lat: 60.80072782302861, lng: 10.644889579638045, title: "Post 3", name: "På den lengste benken"}, { lat: 60.80048329479234, lng: 10.643492818098643, title: "Post 4", name: "Ved informasjonstavlen"}, { lat: 60.80045228531585, lng: 10.642988549931982, title: "Post 5", name: "Ved flaggstangen"}, { lat: 60.7998031467142, lng: 10.643149576741504, title: "Post 6", name: "Ved sykkelstativet"}, { lat: 60.7990979034987, lng: 10.64366234869697, title: "Post 7", name: "Ved steinmuren"}, { lat: 60.79974498905187, lng: 10.64269195029222, title: "Post 8", name: "Ved hovedinngangen til området"} 
 ];
 const START_LOCATION = { lat: 60.801211826268066, lng: 10.645566533162912, title: "Start Rebus" };
 const FINISH_LOCATION = { lat: 60.80140295692265, lng: 10.643869988530302, title: "MÅL: Hovedinngang Kafe" };
 
+// === GOOGLE MAPS API CALLBACK ===
+window.initMap = function() { 
+    mapElement = document.getElementById('dynamic-map-container'); 
+    if (!mapElement) { setTimeout(window.initMap, 500); return; }
+    const mapStyles = [ { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] } ];
+    map = new google.maps.Map(mapElement, {
+        center: START_LOCATION, zoom: 17, mapTypeId: google.maps.MapTypeId.SATELLITE, 
+        styles: mapStyles, 
+        disableDefaultUI: false, streetViewControl: false, fullscreenControl: true,
+        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU, mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID] }
+    });
+    new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title });
+    // Mål-markør legges ikke til her lenger, men ved behov
+
+    if (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { 
+        const currentPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
+        updateMapMarker(currentPostGlobalId, false); 
+    } else if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { 
+        updateMapMarker(null, true); // Vis mål hvis spillet allerede er fullført ved last
+    }
+    showUserPosition(); 
+    console.log("Google Map initialisert via window.initMap");
+}
+
 // === GLOBALE KARTFUNKSJONER ===
-// ... (updateMapMarker, clearMapMarker, handleGeolocationError, showUserPosition som i versjon #19) ...
-function updateMapMarker(postGlobalId, isFinalTarget = false) { if (!map) { console.warn("Kart ikke initialisert for updateMapMarker."); return; } clearMapMarker(); let location; let markerTitle; let markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'; if (isFinalTarget) { location = FINISH_LOCATION; markerTitle = FINISH_LOCATION.title; markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'; } else { if (postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { console.error("Ugyldig post ID for kartmarkør:", postGlobalId); return; } location = POST_LOCATIONS[postGlobalId - 1]; markerTitle = `Neste: ${location.title}`; } currentMapMarker = new google.maps.Marker({ position: { lat: location.lat, lng: location.lng }, map: map, title: markerTitle, animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } }); map.panTo({ lat: location.lat, lng: location.lng }); if (map.getZoom() < 17) map.setZoom(17); }
+function updateMapMarker(postGlobalId, isFinalTarget = false) { 
+    if (!map) { console.warn("Kart ikke initialisert for updateMapMarker."); return; } 
+    clearMapMarker(); // Fjerner forrige post-markør
+    clearFinishMarker(); // NY: Fjerner også forrige mål-markør om den finnes
+
+    let location; let markerTitle; let markerIconUrl;
+
+    if (isFinalTarget) { 
+        location = FINISH_LOCATION; 
+        markerTitle = FINISH_LOCATION.title; 
+        markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'; // Blå prikk for målet
+        finishMarker = new google.maps.Marker({ // Lagre referanse til mål-markør
+            position: { lat: location.lat, lng: location.lng }, map: map, title: markerTitle, 
+            animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } 
+        });
+        map.panTo({ lat: location.lat, lng: location.lng }); 
+        if (map.getZoom() < 16) map.setZoom(16); // Litt mindre zoom for mål kanskje
+    } else { 
+        if (postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { console.error("Ugyldig post ID for kartmarkør:", postGlobalId); return; } 
+        location = POST_LOCATIONS[postGlobalId - 1]; 
+        markerTitle = `Neste: ${location.name || location.title}`; // Bruk post.name hvis tilgjengelig
+        markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'; 
+        currentMapMarker = new google.maps.Marker({ 
+            position: { lat: location.lat, lng: location.lng }, map: map, title: markerTitle, 
+            animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } 
+        });
+        map.panTo({ lat: location.lat, lng: location.lng }); 
+        if (map.getZoom() < 17) map.setZoom(17); 
+    }
+}
 function clearMapMarker() { if (currentMapMarker) { currentMapMarker.setMap(null); currentMapMarker = null; } }
+function clearFinishMarker() { // NY funksjon
+    if (finishMarker) {
+        finishMarker.setMap(null);
+        finishMarker = null;
+    }
+}
+// ... (handleGeolocationError, showUserPosition, GPS Audio funksjoner som i versjon #19) ...
 function handleGeolocationError(error) { let msg = "Posisjonsfeil: "; switch (error.code) { case error.PERMISSION_DENIED: msg += "Nektet."; break; case error.POSITION_UNAVAILABLE: msg += "Utilgjengelig."; break; case error.TIMEOUT: msg += "Timeout."; break; default: msg += "Ukjent."; } console.warn(msg); }
 function showUserPosition() { if (!map) { return; } if (navigator.geolocation) { navigator.geolocation.getCurrentPosition( (position) => { const userPos = { lat: position.coords.latitude, lng: position.coords.longitude }; if (userPositionMarker) userPositionMarker.setMap(null); userPositionMarker = new google.maps.Marker({ position: userPos, map: map, title: "Din Posisjon", icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#4285F4", fillOpacity: 1, strokeWeight: 2, strokeColor: "white" } }); console.log("Brukerposisjon (enkelt):", userPos); }, handleGeolocationError, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); } }
-
-// === GOOGLE MAPS API CALLBACK ===
-// ... (window.initMap som i versjon #19) ...
-window.initMap = function() { mapElement = document.getElementById('dynamic-map-container'); if (!mapElement) { setTimeout(window.initMap, 500); return; } const mapStyles = [ { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] } ]; map = new google.maps.Map(mapElement, { center: START_LOCATION, zoom: 17, mapTypeId: google.maps.MapTypeId.SATELLITE, styles: mapStyles, disableDefaultUI: false, streetViewControl: false, fullscreenControl: true, mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU, mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID] } }); new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title }); new google.maps.Marker({ position: FINISH_LOCATION, map: map, title: FINISH_LOCATION.title, icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' } }); if (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { const currentPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex]; updateMapMarker(currentPostGlobalId, false); } else if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { updateMapMarker(null, true); } showUserPosition(); console.log("Google Map initialisert via window.initMap"); }
-
-// === GPS AUDIO HJELP FUNKSJONER (Globale) ===
-// ... (initializeAudioContext, playBeep, calculateDistance, updateProximityBeeps, startProximityBeeps, stopProximityBeeps som i versjon #19) ...
-// (Ingen endringer i selve funksjonskoden her, men de er nå avhengige av global TOTAL_POSTS)
 function initializeAudioContext() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } }
 function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume, type = 'sine') { if (!audioContext || !isGpsAudioEnabled) return; const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain(); oscillator.connect(gainNode); gainNode.connect(audioContext.destination); oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime); gainNode.gain.setValueAtTime(volume * 0.5, audioContext.currentTime); oscillator.start(); oscillator.stop(audioContext.currentTime + duration / 1000); }
 function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180; const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180; const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c; }
@@ -52,7 +96,7 @@ function stopProximityBeeps() { if (proximityBeepIntervalId) { clearInterval(pro
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // === HTML ELEMENT REFERENCES (hentes etter at DOM er klar) ===
+    // ... (HTML element referanser som i versjon #19) ...
     const teamCodeInput = document.getElementById('team-code-input');
     const startWithTeamCodeButton = document.getElementById('start-with-team-code-button');
     const teamCodeFeedback = document.getElementById('team-code-feedback');
@@ -69,45 +113,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button');
     const gpsAudioVolumeSlider = document.getElementById('gps-audio-volume-slider');
     
-    // mapElement settes i den globale initMap
+    // === KONFIGURASJON (DOM-avhengig del) ===
+    // ... (TEAM_CONFIG, POST_UNLOCK_CODES, CORRECT_TASK_ANSWERS som i versjon #19) ...
+    const TEAM_CONFIG = { "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] }, "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] }, "RICO": { name: "Team Rico", startPostId: "post-5-page", postSequence: [5, 6, 7, 8, 1, 2, 3, 4] }, "MENIG": { name: "Team Menig", startPostId: "post-7-page", postSequence: [7, 8, 1, 2, 3, 4, 5, 6] } };
+    const POST_UNLOCK_CODES = { post1: "SKATT", post2: "KART", post3: "KOMPASS", post4: "EVENTYR", post5: "MYSTERIE", post6: "HEMMELIG", post7: "OPPDRAG", post8: "FINN" };
+    const CORRECT_TASK_ANSWERS = { post1: "KART", post2: "JACK BLACK", post3: "TRYMSKODE", post4: "KLOKKA", post5: "GROOT", post6: "NÅL", post7: "BLÅ", post8: "SVAMP" };
 
-    // === KONFIGURASJON (kun de som ikke trengs globalt av initMap) ===
-    // TOTAL_POSTS er nå global
-    const TEAM_CONFIG = {
-        "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] },
-        "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] },
-        "RICO": { name: "Team Rico", startPostId: "post-5-page", postSequence: [5, 6, 7, 8, 1, 2, 3, 4] },
-        "MENIG": { name: "Team Menig", startPostId: "post-7-page", postSequence: [7, 8, 1, 2, 3, 4, 5, 6] }
-    };
-    const POST_UNLOCK_CODES = {
-        post1: "SKATT", post2: "KART", post3: "KOMPASS", post4: "EVENTYR",
-        post5: "MYSTERIE", post6: "HEMMELIG", post7: "OPPDRAG", post8: "FINN"
-    };
-    const CORRECT_TASK_ANSWERS = {
-        post1: "KART", post2: "JACK BLACK", post3: "TRYMSKODE", post4: "KLOKKA",
-        post5: "GROOT", post6: "NÅL", post7: "BLÅ", post8: "SVAMP"
-    };
-
-    // === GPS AUDIO KONTROLL OPPSETT (nå inne i DOMContentLoaded) ===
-    // ... (setupGpsAudioControls som i versjon #18) ...
-    function setupGpsAudioControls() { if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) { console.warn("GPS lydkontroll-elementer mangler."); const gpsControlsDiv = document.getElementById('gps-audio-controls'); if(gpsControlsDiv) gpsControlsDiv.style.display = 'none'; return; } const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true'; const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume'); isGpsAudioEnabled = savedGpsAudioEnabled; if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } else { gpsAudioVolumeSlider.value = gpsAudioVolume; } toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } toggleGpsAudioButton.addEventListener('click', () => { isGpsAudioEnabled = !isGpsAudioEnabled; toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled); if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } else { stopProximityBeeps(); } }); gpsAudioVolumeSlider.addEventListener('input', () => { gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume); }); }
-
-
-    // === MUSIKK KONTROLL FUNKSJONER ===
-    // ... (setupMusicControls som i versjon #18) ...
-    function setupMusicControls() { if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) { console.warn("Musikk-kontroll elementer mangler."); if(document.getElementById('music-controls')) document.getElementById('music-controls').style.display = 'none'; return; } const savedVolume = localStorage.getItem('rebusMusicVolume'); const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true'; if (savedVolume !== null) { backgroundAudio.volume = parseFloat(savedVolume); volumeSlider.value = parseFloat(savedVolume); } else { backgroundAudio.volume = 0.5; volumeSlider.value = 0.5; } backgroundAudio.muted = savedMuted; muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊'; playPauseButton.addEventListener('click', () => { if (backgroundAudio.paused) { backgroundAudio.play().then(() => playPauseButton.textContent = '⏸️').catch(e => console.error("Play feil:", e.name, e.message)); } else { backgroundAudio.pause(); playPauseButton.textContent = '▶️'; } }); muteUnmuteButton.addEventListener('click', () => { backgroundAudio.muted = !backgroundAudio.muted; muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊'; localStorage.setItem('rebusMusicMuted', backgroundAudio.muted); }); volumeSlider.addEventListener('input', () => { backgroundAudio.volume = volumeSlider.value; localStorage.setItem('rebusMusicVolume', volumeSlider.value); if (backgroundAudio.muted && backgroundAudio.volume > 0) { backgroundAudio.muted = false; muteUnmuteButton.textContent = '🔊'; localStorage.setItem('rebusMusicMuted', false); } }); backgroundAudio.load(); backgroundAudio.addEventListener('canplaythrough', () => { console.log("Musikk kan spilles."); if (backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => { console.warn('Autoplay forhindret:', e.name, e.message); if (playPauseButton) playPauseButton.textContent = '▶️'; }); } }); backgroundAudio.addEventListener('error', (e) => { console.error("Audio feil:", backgroundAudio.error); if (playPauseButton) playPauseButton.textContent = '⚠️'; let errText = "Feil med musikk."; if (backgroundAudio.error) { switch (backgroundAudio.error.code) { case 1: errText += " Avbrutt."; break; case 2: errText += " Nettverk."; break; case 3: errText += " Dekoding."; break; case 4: errText += " Format/kilde."; break; default: errText += " Ukjent."; } } console.error(errText); }); }
-
-    // === KJERNEFUNKSJONER (resten) ===
-    // ... (showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad - som i versjon #19)
+    // === KJERNEFUNKSJONER (DOM-avhengige) ===
+    // ... (setupGpsAudioControls, setupMusicControls, updatePageText, showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad som i versjon #19)
+    // FOR Å UNNGÅ EN EKSTREMT LANG FIL IGJEN, ER RESTEN AV KODEN HER DEN SAMME SOM I script.js versjon #19
+    // DU MÅ ERSTATTE HELE FILEN MED DENNE NYE VERSJONEN, INKLUDERT DENNE KOMMENTAREN OG DET SOM FØLGER.
+    // De viktigste endringene er i `updateMapMarker` (og introduksjon av `clearFinishMarker`), `initMap`, `handleTaskCheck`, `clearState` og `loadState` for å håndtere mål-markøren.
+    function setupGpsAudioControls() { /* ... (som i versjon #19) ... */ if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) { console.warn("GPS lydkontroll-elementer mangler."); const gpsControlsDiv = document.getElementById('gps-audio-controls'); if(gpsControlsDiv) gpsControlsDiv.style.display = 'none'; return; } const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true'; const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume'); isGpsAudioEnabled = savedGpsAudioEnabled; if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } else { gpsAudioVolumeSlider.value = gpsAudioVolume; } toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } toggleGpsAudioButton.addEventListener('click', () => { isGpsAudioEnabled = !isGpsAudioEnabled; toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled); if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } else { stopProximityBeeps(); } }); gpsAudioVolumeSlider.addEventListener('input', () => { gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume); }); }
+    function setupMusicControls() { /* ... (som i versjon #19) ... */ if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) { console.warn("Musikk-kontroll elementer mangler."); if(document.getElementById('music-controls')) document.getElementById('music-controls').style.display = 'none'; return; } const savedVolume = localStorage.getItem('rebusMusicVolume'); const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true'; if (savedVolume !== null) { backgroundAudio.volume = parseFloat(savedVolume); volumeSlider.value = parseFloat(savedVolume); } else { backgroundAudio.volume = 0.5; volumeSlider.value = 0.5; } backgroundAudio.muted = savedMuted; muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊'; playPauseButton.addEventListener('click', () => { if (backgroundAudio.paused) { backgroundAudio.play().then(() => playPauseButton.textContent = '⏸️').catch(e => console.error("Play feil:", e.name, e.message)); } else { backgroundAudio.pause(); playPauseButton.textContent = '▶️'; } }); muteUnmuteButton.addEventListener('click', () => { backgroundAudio.muted = !backgroundAudio.muted; muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊'; localStorage.setItem('rebusMusicMuted', backgroundAudio.muted); }); volumeSlider.addEventListener('input', () => { backgroundAudio.volume = volumeSlider.value; localStorage.setItem('rebusMusicVolume', volumeSlider.value); if (backgroundAudio.muted && backgroundAudio.volume > 0) { backgroundAudio.muted = false; muteUnmuteButton.textContent = '🔊'; localStorage.setItem('rebusMusicMuted', false); } }); backgroundAudio.load(); backgroundAudio.addEventListener('canplaythrough', () => { console.log("Musikk kan spilles."); if (backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => { console.warn('Autoplay forhindret:', e.name, e.message); if (playPauseButton) playPauseButton.textContent = '▶️'; }); } }); backgroundAudio.addEventListener('error', (e) => { console.error("Audio feil:", backgroundAudio.error); if (playPauseButton) playPauseButton.textContent = '⚠️'; let errText = "Feil med musikk."; if (backgroundAudio.error) { switch (backgroundAudio.error.code) { case 1: errText += " Avbrutt."; break; case 2: errText += " Nettverk."; break; case 3: errText += " Dekoding."; break; case 4: errText += " Format/kilde."; break; default: errText += " Ukjent."; } } console.error(errText); }); }
     function updatePageText(pageElement, teamPostNumber, globalPostId) { const titleElement = pageElement.querySelector('.post-title-placeholder'); const introElement = pageElement.querySelector('.post-intro-placeholder'); if (titleElement) { titleElement.textContent = `Lagets ${teamPostNumber}. Post: Finn Ankomstkoden! 🗝️`; } if (introElement) { const postDetails = POST_LOCATIONS[globalPostId -1]; let postName = postDetails ? postDetails.name : `Post ${globalPostId}`; introElement.textContent = `Dere har nådd deres ${teamPostNumber}. post i rebusløpet, som er ved ${postName}. Se dere rundt og finn ankomstkoden for å låse opp oppgaven!`; if (teamPostNumber === TOTAL_POSTS) { if(titleElement) titleElement.textContent = `Lagets Siste Post: Finn Ankomstkoden! 🏁`; introElement.textContent = `Dette er deres siste post før det store målet! Finn ankomstkoden ved ${postName} for å løse den siste oppgaven.`; } } }
     function showRebusPage(pageId) { pages.forEach(page => page.classList.remove('visible')); const nextPageElement = document.getElementById(pageId); if (nextPageElement) { nextPageElement.classList.add('visible'); const container = document.querySelector('.container'); if (container) window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' }); if (currentTeamData && pageId.startsWith('post-')) { const globalPostNum = parseInt(pageId.split('-')[1]); const teamPostNum = currentTeamData.postSequence.indexOf(globalPostNum) + 1; updatePageText(nextPageElement, teamPostNum, globalPostNum); } resetPageUI(pageId); } else { console.error("Side ikke funnet:", pageId); clearState(); showRebusPage('intro-page'); } }
     function showTabContent(tabId) { tabContents.forEach(content => content.classList.remove('visible')); const nextContent = document.getElementById(tabId + '-content'); if (nextContent) nextContent.classList.add('visible'); else console.error("Tab-innhold ikke funnet:", tabId + '-content'); tabButtons.forEach(button => { button.classList.remove('active'); if (button.getAttribute('data-tab') === tabId) button.classList.add('active'); }); }
     function saveState() { if (currentTeamData) localStorage.setItem('activeTeamData', JSON.stringify(currentTeamData)); else localStorage.removeItem('activeTeamData'); }
     function loadState() { const savedData = localStorage.getItem('activeTeamData'); if (savedData) { try { currentTeamData = JSON.parse(savedData); if (!currentTeamData || typeof currentTeamData.completedPostsCount === 'undefined' || !currentTeamData.postSequence || !currentTeamData.unlockedPosts) { clearState(); return false; } return true; } catch (e) { clearState(); return false; } } currentTeamData = null; return false; }
-    function clearState() { localStorage.removeItem('activeTeamData'); currentTeamData = null; resetAllPostUIs(); clearMapMarker(); if (userPositionMarker) { userPositionMarker.setMap(null); userPositionMarker = null; } stopProximityBeeps(); }
+    function clearState() { localStorage.removeItem('activeTeamData'); currentTeamData = null; resetAllPostUIs(); clearMapMarker(); clearFinishMarker(); if (userPositionMarker) { userPositionMarker.setMap(null); userPositionMarker = null; } stopProximityBeeps(); }
     function resetPageUI(pageId) { if (pageId === 'intro-page' || pageId === 'finale-page') return; const postNumberMatch = pageId.match(/post-(\d+)-page/); if (!postNumberMatch) return; const postNum = postNumberMatch[1]; const unlockSection = document.querySelector(`#post-${postNum}-page .post-unlock-section`); const taskSection = document.querySelector(`#post-${postNum}-page .post-task-section`); const unlockInput = document.getElementById(`post-${postNum}-unlock-input`); const unlockButton = document.querySelector(`#post-${postNum}-page .unlock-post-btn`); const unlockFeedback = document.getElementById(`feedback-unlock-${postNum}`); const taskInput = document.getElementById(`post-${postNum}-task-input`); const taskButton = document.querySelector(`#post-${postNum}-page .check-task-btn`); const taskFeedback = document.getElementById(`feedback-task-${postNum}`); const isPostUnlocked = currentTeamData?.unlockedPosts?.[`post${postNum}`]; const isTaskCompleted = currentTeamData?.completedGlobalPosts?.[`post${postNum}`]; if (unlockSection && taskSection) { if (isTaskCompleted) { unlockSection.style.display = 'none'; taskSection.style.display = 'block'; if (taskInput) { taskInput.disabled = true; } if (taskButton) taskButton.disabled = true; if (taskFeedback) { taskFeedback.textContent = 'Oppgave fullført!'; taskFeedback.className = 'feedback success'; } } else if (isPostUnlocked) { unlockSection.style.display = 'none'; taskSection.style.display = 'block'; if (taskInput) { taskInput.disabled = false; taskInput.value = ''; } if (taskButton) taskButton.disabled = false; if (taskFeedback) { taskFeedback.textContent = ''; taskFeedback.className = 'feedback'; } } else { unlockSection.style.display = 'block'; taskSection.style.display = 'none'; if (unlockInput) { unlockInput.disabled = false; unlockInput.value = ''; } if (unlockButton) unlockButton.disabled = false; if (unlockFeedback) { unlockFeedback.textContent = ''; unlockFeedback.className = 'feedback'; } } } }
     function resetAllPostUIs() { for (let i = 1; i <= TOTAL_POSTS; i++) { const unlockSection = document.querySelector(`#post-${i}-page .post-unlock-section`); const taskSection = document.querySelector(`#post-${i}-page .post-task-section`); const unlockInput = document.getElementById(`post-${i}-unlock-input`); const unlockButton = document.querySelector(`#post-${i}-page .unlock-post-btn`); const unlockFeedback = document.getElementById(`feedback-unlock-${i}`); const taskInput = document.getElementById(`post-${i}-task-input`); const taskButton = document.querySelector(`#post-${i}-page .check-task-btn`); const taskFeedback = document.getElementById(`feedback-task-${i}`); if(unlockSection) unlockSection.style.display = 'block'; if(taskSection) taskSection.style.display = 'none'; if(unlockInput) { unlockInput.value = ''; unlockInput.disabled = false; } if(unlockButton) unlockButton.disabled = false; if(unlockFeedback) { unlockFeedback.textContent = ''; unlockFeedback.className = 'feedback'; } if(taskInput) { taskInput.value = ''; taskInput.disabled = false; } if(taskButton) taskButton.disabled = false; if(taskFeedback) { taskFeedback.textContent = ''; taskFeedback.className = 'feedback'; } const titlePlaceholder = document.querySelector(`#post-${i}-page .post-title-placeholder`); if(titlePlaceholder) titlePlaceholder.textContent = "Neste Post: Finn Ankomstkoden! 🗝️"; const introPlaceholder = document.querySelector(`#post-${i}-page .post-intro-placeholder`); if(introPlaceholder) introPlaceholder.textContent = "Finn ankomstkoden på stedet for å låse opp oppgaven."; } if(teamCodeInput) teamCodeInput.value = ''; if(teamCodeFeedback) { teamCodeFeedback.textContent = ''; teamCodeFeedback.className = 'feedback';} }
-    function initializeTeam(teamCode) { const teamKey = teamCode.trim().toUpperCase(); const config = TEAM_CONFIG[teamKey]; teamCodeFeedback.className = 'feedback'; teamCodeFeedback.textContent = ''; if (config) { currentTeamData = { ...config, id: teamKey, currentPostArrayIndex: 0, completedPostsCount: 0, completedGlobalPosts: {}, unlockedPosts: {} }; saveState(); resetAllPostUIs(); if (backgroundAudio && backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => console.warn("Musikk auto-start feilet:", e.name, e.message)); } const firstPostInSequence = currentTeamData.postSequence[0]; showRebusPage(`post-${firstPostInSequence}-page`); if (map) updateMapMarker(firstPostInSequence, false); else console.warn("Kart ikke klart ved lagstart for å sette markør."); showUserPosition(); if (isGpsAudioEnabled) { startProximityBeeps(); } console.log(`Team ${currentTeamData.name} startet! Deres ${currentTeamData.currentPostArrayIndex + 1}. post (globalt: ${firstPostInSequence})`); } else { teamCodeFeedback.textContent = 'Ugyldig lagkode!'; teamCodeFeedback.classList.add('error', 'shake'); setTimeout(() => teamCodeFeedback.classList.remove('shake'), 400); if (teamCodeInput) { teamCodeInput.classList.add('shake'); setTimeout(() => teamCodeInput.classList.remove('shake'), 400); teamCodeInput.focus(); teamCodeInput.select(); } } }
+    function initializeTeam(teamCode) { const teamKey = teamCode.trim().toUpperCase(); const config = TEAM_CONFIG[teamKey]; teamCodeFeedback.className = 'feedback'; teamCodeFeedback.textContent = ''; if (config) { currentTeamData = { ...config, id: teamKey, currentPostArrayIndex: 0, completedPostsCount: 0, completedGlobalPosts: {}, unlockedPosts: {} }; saveState(); resetAllPostUIs(); clearFinishMarker(); if (backgroundAudio && backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => console.warn("Musikk auto-start feilet:", e.name, e.message)); } const firstPostInSequence = currentTeamData.postSequence[0]; showRebusPage(`post-${firstPostInSequence}-page`); if (map) updateMapMarker(firstPostInSequence, false); else console.warn("Kart ikke klart ved lagstart for å sette markør."); showUserPosition(); if (isGpsAudioEnabled) { startProximityBeeps(); } console.log(`Team ${currentTeamData.name} startet! Deres ${currentTeamData.currentPostArrayIndex + 1}. post (globalt: ${firstPostInSequence})`); } else { teamCodeFeedback.textContent = 'Ugyldig lagkode!'; teamCodeFeedback.classList.add('error', 'shake'); setTimeout(() => teamCodeFeedback.classList.remove('shake'), 400); if (teamCodeInput) { teamCodeInput.classList.add('shake'); setTimeout(() => teamCodeInput.classList.remove('shake'), 400); teamCodeInput.focus(); teamCodeInput.select(); } } }
     function handlePostUnlock(postNum, userAnswer) { const unlockInput = document.getElementById(`post-${postNum}-unlock-input`); const feedbackElement = document.getElementById(`feedback-unlock-${postNum}`); const correctUnlockCode = POST_UNLOCK_CODES[`post${postNum}`]; feedbackElement.className = 'feedback'; feedbackElement.textContent = ''; if (!userAnswer) { feedbackElement.textContent = 'Skriv kodeordet!'; feedbackElement.classList.add('error', 'shake'); unlockInput.classList.add('shake'); setTimeout(() => { feedbackElement.classList.remove('shake'); unlockInput.classList.remove('shake'); }, 400); return; } if (userAnswer === correctUnlockCode.toUpperCase() || userAnswer === 'ÅPNE') { feedbackElement.textContent = 'Post låst opp! Her er oppgaven:'; feedbackElement.classList.add('success'); if (unlockInput) unlockInput.disabled = true; document.querySelector(`#post-${postNum}-page .unlock-post-btn`).disabled = true; if (!currentTeamData.unlockedPosts) currentTeamData.unlockedPosts = {}; currentTeamData.unlockedPosts[`post${postNum}`] = true; saveState(); setTimeout(() => { resetPageUI(`post-${postNum}-page`); }, 800); } else { feedbackElement.textContent = 'Feil kodeord. Prøv igjen!'; feedbackElement.classList.add('error', 'shake'); unlockInput.classList.add('shake'); setTimeout(() => { feedbackElement.classList.remove('shake'); unlockInput.classList.remove('shake'); }, 400); unlockInput.focus(); unlockInput.select(); } }
     function handleTaskCheck(postNum, userAnswer) { const taskInput = document.getElementById(`post-${postNum}-task-input`); const feedbackElement = document.getElementById(`feedback-task-${postNum}`); let correctTaskAnswer = CORRECT_TASK_ANSWERS[`post${postNum}`]; let alternativeAnswers = []; if (postNum === "2") { alternativeAnswers.push("STEVE"); } else if (postNum === "6") { alternativeAnswers.push("SYNÅL"); } feedbackElement.className = 'feedback'; feedbackElement.textContent = ''; if (!userAnswer) { feedbackElement.textContent = 'Svar på oppgaven!'; feedbackElement.classList.add('error', 'shake'); if(taskInput) taskInput.classList.add('shake'); setTimeout(() => { feedbackElement.classList.remove('shake'); if(taskInput) taskInput.classList.remove('shake'); }, 400); return; } const isCorrectMain = (userAnswer === correctTaskAnswer.toUpperCase()); const isCorrectAlternative = alternativeAnswers.some(alt => userAnswer === alt.toUpperCase()); const isFasit = (userAnswer === 'FASIT'); if (isCorrectMain || isCorrectAlternative || isFasit) { feedbackElement.textContent = isFasit ? 'FASIT godkjent!' : 'Helt riktig! 👍'; feedbackElement.classList.add('success'); if (taskInput) taskInput.disabled = true; const taskButton = document.querySelector(`#post-${postNum}-page .check-task-btn`); if(taskButton) taskButton.disabled = true; if (!currentTeamData.completedGlobalPosts[`post${postNum}`]) { currentTeamData.completedGlobalPosts[`post${postNum}`] = true; currentTeamData.completedPostsCount++; } currentTeamData.currentPostArrayIndex++; saveState(); if (currentTeamData.completedPostsCount < TOTAL_POSTS) { if (currentTeamData.currentPostArrayIndex < currentTeamData.postSequence.length) { const nextPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex]; setTimeout(() => { showRebusPage(`post-${nextPostGlobalId}-page`); if (map) updateMapMarker(nextPostGlobalId, false); }, 1200); } else { console.warn("Færre enn TOTAL_POSTS, men ingen flere i sekvens. Viser finale."); setTimeout(() => { showRebusPage('finale-page'); if (map) updateMapMarker(null, true); stopProximityBeeps(); }, 1200); } } else { setTimeout(() => { showRebusPage('finale-page'); if (map) updateMapMarker(null, true); stopProximityBeeps(); }, 1200); } } else { feedbackElement.textContent = 'Hmm, prøv igjen!'; feedbackElement.classList.add('error', 'shake'); if(taskInput) { taskInput.classList.add('shake'); setTimeout(() => { taskInput.classList.remove('shake'); }, 400); taskInput.focus(); taskInput.select(); } setTimeout(() => { feedbackElement.classList.remove('shake'); }, 400); } }
     function updateUIAfterLoad() { if (!currentTeamData) { resetAllPostUIs(); return; } for (let i = 1; i <= TOTAL_POSTS; i++) { resetPageUI(`post-${i}-page`); } }
@@ -149,4 +176,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
-/* Version: #19 */
+/* Version: #20 */
