@@ -1,4 +1,4 @@
-/* Version: #19 */
+/* Version: #20 */
 
 // === GLOBALE VARIABLER ===
 let map;
@@ -13,7 +13,9 @@ let gpsAudioVolume = 0.7;
 let positionWatchId = null; 
 let previousDistanceToTarget = null;
 
-// === KONFIGURASJON FOR KART (Globalt tilgjengelig for initMap) ===
+// === GLOBAL KONFIGURASJON (tilgjengelig for alle funksjoner) ===
+const TOTAL_POSTS = 8; // <--- FLYTTET HIT (GLOBAL)
+
 const POST_LOCATIONS = [
     { lat: 60.8007539616181, lng: 10.646227725129991, title: "Post 1", name: "Ved den røde husken"},
     { lat: 60.80017468739349, lng: 10.64510651928592, title: "Post 2", name: "Ved den store eika"},
@@ -28,125 +30,25 @@ const START_LOCATION = { lat: 60.801211826268066, lng: 10.645566533162912, title
 const FINISH_LOCATION = { lat: 60.80140295692265, lng: 10.643869988530302, title: "MÅL: Hovedinngang Kafe" };
 
 // === GLOBALE KARTFUNKSJONER ===
-function updateMapMarker(postGlobalId, isFinalTarget = false) { 
-    if (!map) { console.warn("Kart ikke initialisert for updateMapMarker."); return; } 
-    clearMapMarker(); 
-    let location; let markerTitle; let markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'; 
-    if (isFinalTarget) { 
-        location = FINISH_LOCATION; markerTitle = FINISH_LOCATION.title; 
-        markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'; 
-    } else { 
-        if (postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { console.error("Ugyldig post ID for kartmarkør:", postGlobalId); return; } 
-        location = POST_LOCATIONS[postGlobalId - 1]; markerTitle = `Neste: ${location.title}`; 
-    } 
-    currentMapMarker = new google.maps.Marker({ 
-        position: { lat: location.lat, lng: location.lng }, map: map, title: markerTitle, 
-        animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } 
-    }); 
-    map.panTo({ lat: location.lat, lng: location.lng }); 
-    if (map.getZoom() < 17) map.setZoom(17); 
-}
+// ... (updateMapMarker, clearMapMarker, handleGeolocationError, showUserPosition som i versjon #19) ...
+function updateMapMarker(postGlobalId, isFinalTarget = false) { if (!map) { console.warn("Kart ikke initialisert for updateMapMarker."); return; } clearMapMarker(); let location; let markerTitle; let markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'; if (isFinalTarget) { location = FINISH_LOCATION; markerTitle = FINISH_LOCATION.title; markerIconUrl = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'; } else { if (postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { console.error("Ugyldig post ID for kartmarkør:", postGlobalId); return; } location = POST_LOCATIONS[postGlobalId - 1]; markerTitle = `Neste: ${location.title}`; } currentMapMarker = new google.maps.Marker({ position: { lat: location.lat, lng: location.lng }, map: map, title: markerTitle, animation: google.maps.Animation.DROP, icon: { url: markerIconUrl } }); map.panTo({ lat: location.lat, lng: location.lng }); if (map.getZoom() < 17) map.setZoom(17); }
 function clearMapMarker() { if (currentMapMarker) { currentMapMarker.setMap(null); currentMapMarker = null; } }
 function handleGeolocationError(error) { let msg = "Posisjonsfeil: "; switch (error.code) { case error.PERMISSION_DENIED: msg += "Nektet."; break; case error.POSITION_UNAVAILABLE: msg += "Utilgjengelig."; break; case error.TIMEOUT: msg += "Timeout."; break; default: msg += "Ukjent."; } console.warn(msg); }
 function showUserPosition() { if (!map) { return; } if (navigator.geolocation) { navigator.geolocation.getCurrentPosition( (position) => { const userPos = { lat: position.coords.latitude, lng: position.coords.longitude }; if (userPositionMarker) userPositionMarker.setMap(null); userPositionMarker = new google.maps.Marker({ position: userPos, map: map, title: "Din Posisjon", icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#4285F4", fillOpacity: 1, strokeWeight: 2, strokeColor: "white" } }); console.log("Brukerposisjon (enkelt):", userPos); }, handleGeolocationError, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } ); } }
 
 // === GOOGLE MAPS API CALLBACK ===
-window.initMap = function() { 
-    mapElement = document.getElementById('dynamic-map-container'); 
-    if (!mapElement) { setTimeout(window.initMap, 500); return; }
-    const mapStyles = [ { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] } ];
-    map = new google.maps.Map(mapElement, {
-        center: START_LOCATION, zoom: 17, mapTypeId: google.maps.MapTypeId.SATELLITE, 
-        styles: mapStyles, 
-        disableDefaultUI: false, streetViewControl: false, fullscreenControl: true,
-        mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU, mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID] }
-    });
-    new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title });
-    new google.maps.Marker({ 
-        position: FINISH_LOCATION, map: map, title: FINISH_LOCATION.title, 
-        icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' }
-    });
-    if (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { 
-        const currentPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
-        updateMapMarker(currentPostGlobalId, false); 
-    } else if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { 
-        updateMapMarker(null, true); 
-    }
-    showUserPosition(); 
-    console.log("Google Map initialisert via window.initMap");
-}
+// ... (window.initMap som i versjon #19) ...
+window.initMap = function() { mapElement = document.getElementById('dynamic-map-container'); if (!mapElement) { setTimeout(window.initMap, 500); return; } const mapStyles = [ { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] } ]; map = new google.maps.Map(mapElement, { center: START_LOCATION, zoom: 17, mapTypeId: google.maps.MapTypeId.SATELLITE, styles: mapStyles, disableDefaultUI: false, streetViewControl: false, fullscreenControl: true, mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU, mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID] } }); new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title }); new google.maps.Marker({ position: FINISH_LOCATION, map: map, title: FINISH_LOCATION.title, icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' } }); if (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { const currentPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex]; updateMapMarker(currentPostGlobalId, false); } else if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { updateMapMarker(null, true); } showUserPosition(); console.log("Google Map initialisert via window.initMap"); }
 
-// === GPS AUDIO HJELP FUNKSJONER (Globale, da de ikke er avhengige av DOMContentLoaded variabler direkte) ===
+// === GPS AUDIO HJELP FUNKSJONER (Globale) ===
+// ... (initializeAudioContext, playBeep, calculateDistance, updateProximityBeeps, startProximityBeeps, stopProximityBeeps som i versjon #19) ...
+// (Ingen endringer i selve funksjonskoden her, men de er nå avhengige av global TOTAL_POSTS)
 function initializeAudioContext() { if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); } }
-function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume, type = 'sine') { 
-    if (!audioContext || !isGpsAudioEnabled) return;
-    const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain();
-    oscillator.connect(gainNode); gainNode.connect(audioContext.destination);
-    oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(volume * 0.5, audioContext.currentTime); 
-    oscillator.start(); oscillator.stop(audioContext.currentTime + duration / 1000);
-}
-function calculateDistance(lat1, lon1, lat2, lon2) { 
-    const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180;
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c;
-}
-function updateProximityBeeps(position) {
-    if (!isGpsAudioEnabled || !currentTeamData || currentTeamData.completedPostsCount >= TOTAL_POSTS) {
-        stopProximityBeeps(); previousDistanceToTarget = null; return;
-    }
-    const userLat = position.coords.latitude; const userLng = position.coords.longitude;
-    const nextPostIndexInSequence = currentTeamData.currentPostArrayIndex;
-    if (nextPostIndexInSequence >= currentTeamData.postSequence.length) { stopProximityBeeps(); previousDistanceToTarget = null; return; }
-    const nextPostGlobalId = currentTeamData.postSequence[nextPostIndexInSequence];
-    if (nextPostGlobalId === undefined || nextPostGlobalId < 1 || nextPostGlobalId > POST_LOCATIONS.length) {
-        stopProximityBeeps(); previousDistanceToTarget = null; return;
-    }
-    const targetLocation = POST_LOCATIONS[nextPostGlobalId - 1];
-    const currentDistance = calculateDistance(userLat, userLng, targetLocation.lat, targetLocation.lng);
-    console.log(`Avstand til Post ${nextPostGlobalId}: ${currentDistance.toFixed(0)}m`);
-    let beepInterval = 0; let baseBeepFrequency = 880; let beepDuration = 100; let beepType = 'sine';
-    if (currentDistance <= 5) { beepInterval = 300; baseBeepFrequency = 1200; beepDuration = 80; } 
-    else if (currentDistance <= 10) { beepInterval = 600; baseBeepFrequency = 1000; } 
-    else if (currentDistance <= 25) { beepInterval = 1000; } 
-    else if (currentDistance <= 50) { beepInterval = 2000; } 
-    else if (currentDistance <= 100) { beepInterval = 3500; } 
-    else if (currentDistance > 100 ) { beepInterval = 6000; baseBeepFrequency = 600; beepDuration = 150;}
-    let finalBeepFrequency = baseBeepFrequency;
-    if (previousDistanceToTarget !== null) {
-        if (currentDistance < previousDistanceToTarget - 0.5) { finalBeepFrequency = baseBeepFrequency * 1.2; beepType = 'sawtooth'; console.log("Nærmere!"); } 
-        else if (currentDistance > previousDistanceToTarget + 0.5) { finalBeepFrequency = baseBeepFrequency * 0.8; beepType = 'square'; console.log("Lenger unna!"); }
-    }
-    if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
-    if (beepInterval > 0) {
-        // Hent den nyeste verdien fra slideren direkte her, i stedet for å stole på global gpsAudioVolume
-        const currentGpsSliderVolume = document.getElementById('gps-audio-volume-slider') ? document.getElementById('gps-audio-volume-slider').valueAsNumber : 0.7;
-        playBeep(finalBeepFrequency, beepDuration, currentGpsSliderVolume, beepType);
-        proximityBeepIntervalId = setInterval(() => {
-            const updatedGpsSliderVolume = document.getElementById('gps-audio-volume-slider') ? document.getElementById('gps-audio-volume-slider').valueAsNumber : 0.7;
-            playBeep(finalBeepFrequency, beepDuration, updatedGpsSliderVolume, beepType);
-        }, beepInterval);
-    }
-    previousDistanceToTarget = currentDistance;
-}
-function startProximityBeeps() { 
-    const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button'); // Hent referanse her
-    if (!navigator.geolocation) { console.warn("Geolocation ikke støttet."); isGpsAudioEnabled = false; if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Av"; return; }
-    if (positionWatchId !== null) return; 
-    initializeAudioContext(); console.log("Starter GPS posisjonssporing for pip.");
-    previousDistanceToTarget = null; 
-    positionWatchId = navigator.geolocation.watchPosition(
-        updateProximityBeeps, 
-        (error) => { handleGeolocationError(error); stopProximityBeeps(); if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Feil"; },
-        { enableHighAccuracy: true, maximumAge: 3000, timeout: 7000 }
-    );
-}
-function stopProximityBeeps() { 
-    if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
-    if (positionWatchId !== null) { navigator.geolocation.clearWatch(positionWatchId); positionWatchId = null; console.log("Stoppet GPS sporing."); }
-    previousDistanceToTarget = null; 
-}
+function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume, type = 'sine') { if (!audioContext || !isGpsAudioEnabled) return; const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain(); oscillator.connect(gainNode); gainNode.connect(audioContext.destination); oscillator.type = type; oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime); gainNode.gain.setValueAtTime(volume * 0.5, audioContext.currentTime); oscillator.start(); oscillator.stop(audioContext.currentTime + duration / 1000); }
+function calculateDistance(lat1, lon1, lat2, lon2) { const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180; const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180; const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c; }
+function updateProximityBeeps(position) { if (!isGpsAudioEnabled || !currentTeamData || currentTeamData.completedPostsCount >= TOTAL_POSTS) { stopProximityBeeps(); previousDistanceToTarget = null; return; } const userLat = position.coords.latitude; const userLng = position.coords.longitude; const nextPostIndexInSequence = currentTeamData.currentPostArrayIndex; if (nextPostIndexInSequence >= currentTeamData.postSequence.length) { stopProximityBeeps(); previousDistanceToTarget = null; return; } const nextPostGlobalId = currentTeamData.postSequence[nextPostIndexInSequence]; if (nextPostGlobalId === undefined || nextPostGlobalId < 1 || nextPostGlobalId > POST_LOCATIONS.length) { stopProximityBeeps(); previousDistanceToTarget = null; return; } const targetLocation = POST_LOCATIONS[nextPostGlobalId - 1]; const currentDistance = calculateDistance(userLat, userLng, targetLocation.lat, targetLocation.lng); console.log(`Avstand til Post ${nextPostGlobalId}: ${currentDistance.toFixed(0)}m`); let beepInterval = 0; let baseBeepFrequency = 880; let beepDuration = 100; let beepType = 'sine'; if (currentDistance <= 5) { beepInterval = 300; baseBeepFrequency = 1200; beepDuration = 80; } else if (currentDistance <= 10) { beepInterval = 600; baseBeepFrequency = 1000; } else if (currentDistance <= 25) { beepInterval = 1000; } else if (currentDistance <= 50) { beepInterval = 2000; } else if (currentDistance <= 100) { beepInterval = 3500; } else if (currentDistance > 100 ) { beepInterval = 6000; baseBeepFrequency = 600; beepDuration = 150;} let finalBeepFrequency = baseBeepFrequency; if (previousDistanceToTarget !== null) { if (currentDistance < previousDistanceToTarget - 0.5) { finalBeepFrequency = baseBeepFrequency * 1.2; beepType = 'sawtooth'; console.log("Nærmere!"); } else if (currentDistance > previousDistanceToTarget + 0.5) { finalBeepFrequency = baseBeepFrequency * 0.8; beepType = 'square'; console.log("Lenger unna!"); } } if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; } if (beepInterval > 0) { const currentGpsSliderVolume = document.getElementById('gps-audio-volume-slider') ? document.getElementById('gps-audio-volume-slider').valueAsNumber : 0.7; playBeep(finalBeepFrequency, beepDuration, currentGpsSliderVolume, beepType); proximityBeepIntervalId = setInterval(() => { const updatedGpsSliderVolume = document.getElementById('gps-audio-volume-slider') ? document.getElementById('gps-audio-volume-slider').valueAsNumber : 0.7; playBeep(finalBeepFrequency, beepDuration, updatedGpsSliderVolume, beepType); }, beepInterval); } previousDistanceToTarget = currentDistance; }
+function startProximityBeeps() { const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button'); if (!navigator.geolocation) { console.warn("Geolocation ikke støttet."); isGpsAudioEnabled = false; if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Av"; return; } if (positionWatchId !== null) return; initializeAudioContext(); console.log("Starter GPS posisjonssporing for pip."); previousDistanceToTarget = null; positionWatchId = navigator.geolocation.watchPosition( updateProximityBeeps, (error) => { handleGeolocationError(error); stopProximityBeeps(); if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Feil"; }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 7000 } ); }
+function stopProximityBeeps() { if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; } if (positionWatchId !== null) { navigator.geolocation.clearWatch(positionWatchId); positionWatchId = null; console.log("Stoppet GPS sporing."); } previousDistanceToTarget = null; }
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -167,10 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button');
     const gpsAudioVolumeSlider = document.getElementById('gps-audio-volume-slider');
     
-    // mapElement settes nå i den globale initMap
+    // mapElement settes i den globale initMap
 
-    // === KONFIGURASJON (DOM-avhengig del) ===
-    const TOTAL_POSTS = 8;
+    // === KONFIGURASJON (kun de som ikke trengs globalt av initMap) ===
+    // TOTAL_POSTS er nå global
     const TEAM_CONFIG = {
         "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] },
         "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] },
@@ -187,63 +89,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === GPS AUDIO KONTROLL OPPSETT (nå inne i DOMContentLoaded) ===
-    function setupGpsAudioControls() {
-        if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) {
-            console.warn("GPS lydkontroll-elementer mangler.");
-            const gpsControlsDiv = document.getElementById('gps-audio-controls');
-            if(gpsControlsDiv) gpsControlsDiv.style.display = 'none';
-            return;
-        }
-        const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true';
-        const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume');
-        isGpsAudioEnabled = savedGpsAudioEnabled; // Setter global variabel
-        if (savedGpsAudioVolume !== null) { 
-            gpsAudioVolume = parseFloat(savedGpsAudioVolume); // Setter global variabel
-            gpsAudioVolumeSlider.value = gpsAudioVolume; 
-        } else { 
-            gpsAudioVolumeSlider.value = gpsAudioVolume; // Bruker global default
-        }
-        toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
-        
-        // Start kun hvis aktivert OG et spill er i gang (currentTeamData er sjekket før kall)
-        if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { 
-            startProximityBeeps(); 
-        }
-        
-        toggleGpsAudioButton.addEventListener('click', () => {
-            isGpsAudioEnabled = !isGpsAudioEnabled;
-            toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
-            localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled);
-            if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } 
-            else { stopProximityBeeps(); }
-        });
-        gpsAudioVolumeSlider.addEventListener('input', () => {
-            gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; // Oppdater den globale variabelen
-            localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume);
-        });
-    }
+    // ... (setupGpsAudioControls som i versjon #18) ...
+    function setupGpsAudioControls() { if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) { console.warn("GPS lydkontroll-elementer mangler."); const gpsControlsDiv = document.getElementById('gps-audio-controls'); if(gpsControlsDiv) gpsControlsDiv.style.display = 'none'; return; } const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true'; const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume'); isGpsAudioEnabled = savedGpsAudioEnabled; if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } else { gpsAudioVolumeSlider.value = gpsAudioVolume; } toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } toggleGpsAudioButton.addEventListener('click', () => { isGpsAudioEnabled = !isGpsAudioEnabled; toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled); if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } else { stopProximityBeeps(); } }); gpsAudioVolumeSlider.addEventListener('input', () => { gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume); }); }
+
 
     // === MUSIKK KONTROLL FUNKSJONER ===
-    function setupMusicControls() { 
-        if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) {
-            console.warn("Musikk-kontroll elementer mangler.");
-            if(document.getElementById('music-controls')) document.getElementById('music-controls').style.display = 'none';
-            return;
-        }
-        const savedVolume = localStorage.getItem('rebusMusicVolume');
-        const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true';
-        if (savedVolume !== null) { backgroundAudio.volume = parseFloat(savedVolume); volumeSlider.value = parseFloat(savedVolume); } 
-        else { backgroundAudio.volume = 0.5; volumeSlider.value = 0.5; }
-        backgroundAudio.muted = savedMuted; muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊';
-        playPauseButton.addEventListener('click', () => { if (backgroundAudio.paused) { backgroundAudio.play().then(() => playPauseButton.textContent = '⏸️').catch(e => console.error("Play feil:", e.name, e.message)); } else { backgroundAudio.pause(); playPauseButton.textContent = '▶️'; } });
-        muteUnmuteButton.addEventListener('click', () => { backgroundAudio.muted = !backgroundAudio.muted; muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊'; localStorage.setItem('rebusMusicMuted', backgroundAudio.muted); });
-        volumeSlider.addEventListener('input', () => { backgroundAudio.volume = volumeSlider.value; localStorage.setItem('rebusMusicVolume', volumeSlider.value); if (backgroundAudio.muted && backgroundAudio.volume > 0) { backgroundAudio.muted = false; muteUnmuteButton.textContent = '🔊'; localStorage.setItem('rebusMusicMuted', false); } });
-        backgroundAudio.load(); 
-        backgroundAudio.addEventListener('canplaythrough', () => { console.log("Musikk kan spilles."); if (backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => { console.warn('Autoplay forhindret:', e.name, e.message); if (playPauseButton) playPauseButton.textContent = '▶️'; }); } });
-        backgroundAudio.addEventListener('error', (e) => { console.error("Audio feil:", backgroundAudio.error); if (playPauseButton) playPauseButton.textContent = '⚠️'; let errText = "Feil med musikk."; if (backgroundAudio.error) { switch (backgroundAudio.error.code) { case 1: errText += " Avbrutt."; break; case 2: errText += " Nettverk."; break; case 3: errText += " Dekoding."; break; case 4: errText += " Format/kilde."; break; default: errText += " Ukjent."; } } console.error(errText); });
-    }
+    // ... (setupMusicControls som i versjon #18) ...
+    function setupMusicControls() { if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) { console.warn("Musikk-kontroll elementer mangler."); if(document.getElementById('music-controls')) document.getElementById('music-controls').style.display = 'none'; return; } const savedVolume = localStorage.getItem('rebusMusicVolume'); const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true'; if (savedVolume !== null) { backgroundAudio.volume = parseFloat(savedVolume); volumeSlider.value = parseFloat(savedVolume); } else { backgroundAudio.volume = 0.5; volumeSlider.value = 0.5; } backgroundAudio.muted = savedMuted; muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊'; playPauseButton.addEventListener('click', () => { if (backgroundAudio.paused) { backgroundAudio.play().then(() => playPauseButton.textContent = '⏸️').catch(e => console.error("Play feil:", e.name, e.message)); } else { backgroundAudio.pause(); playPauseButton.textContent = '▶️'; } }); muteUnmuteButton.addEventListener('click', () => { backgroundAudio.muted = !backgroundAudio.muted; muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊'; localStorage.setItem('rebusMusicMuted', backgroundAudio.muted); }); volumeSlider.addEventListener('input', () => { backgroundAudio.volume = volumeSlider.value; localStorage.setItem('rebusMusicVolume', volumeSlider.value); if (backgroundAudio.muted && backgroundAudio.volume > 0) { backgroundAudio.muted = false; muteUnmuteButton.textContent = '🔊'; localStorage.setItem('rebusMusicMuted', false); } }); backgroundAudio.load(); backgroundAudio.addEventListener('canplaythrough', () => { console.log("Musikk kan spilles."); if (backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => { console.warn('Autoplay forhindret:', e.name, e.message); if (playPauseButton) playPauseButton.textContent = '▶️'; }); } }); backgroundAudio.addEventListener('error', (e) => { console.error("Audio feil:", backgroundAudio.error); if (playPauseButton) playPauseButton.textContent = '⚠️'; let errText = "Feil med musikk."; if (backgroundAudio.error) { switch (backgroundAudio.error.code) { case 1: errText += " Avbrutt."; break; case 2: errText += " Nettverk."; break; case 3: errText += " Dekoding."; break; case 4: errText += " Format/kilde."; break; default: errText += " Ukjent."; } } console.error(errText); }); }
 
     // === KJERNEFUNKSJONER (resten) ===
+    // ... (showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad - som i versjon #19)
     function updatePageText(pageElement, teamPostNumber, globalPostId) { const titleElement = pageElement.querySelector('.post-title-placeholder'); const introElement = pageElement.querySelector('.post-intro-placeholder'); if (titleElement) { titleElement.textContent = `Lagets ${teamPostNumber}. Post: Finn Ankomstkoden! 🗝️`; } if (introElement) { const postDetails = POST_LOCATIONS[globalPostId -1]; let postName = postDetails ? postDetails.name : `Post ${globalPostId}`; introElement.textContent = `Dere har nådd deres ${teamPostNumber}. post i rebusløpet, som er ved ${postName}. Se dere rundt og finn ankomstkoden for å låse opp oppgaven!`; if (teamPostNumber === TOTAL_POSTS) { if(titleElement) titleElement.textContent = `Lagets Siste Post: Finn Ankomstkoden! 🏁`; introElement.textContent = `Dette er deres siste post før det store målet! Finn ankomstkoden ved ${postName} for å løse den siste oppgaven.`; } } }
     function showRebusPage(pageId) { pages.forEach(page => page.classList.remove('visible')); const nextPageElement = document.getElementById(pageId); if (nextPageElement) { nextPageElement.classList.add('visible'); const container = document.querySelector('.container'); if (container) window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' }); if (currentTeamData && pageId.startsWith('post-')) { const globalPostNum = parseInt(pageId.split('-')[1]); const teamPostNum = currentTeamData.postSequence.indexOf(globalPostNum) + 1; updatePageText(nextPageElement, teamPostNum, globalPostNum); } resetPageUI(pageId); } else { console.error("Side ikke funnet:", pageId); clearState(); showRebusPage('intro-page'); } }
     function showTabContent(tabId) { tabContents.forEach(content => content.classList.remove('visible')); const nextContent = document.getElementById(tabId + '-content'); if (nextContent) nextContent.classList.add('visible'); else console.error("Tab-innhold ikke funnet:", tabId + '-content'); tabButtons.forEach(button => { button.classList.remove('active'); if (button.getAttribute('data-tab') === tabId) button.classList.add('active'); }); }
