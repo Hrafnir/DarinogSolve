@@ -1,4 +1,4 @@
-/* Version: #4 */
+/* Version: #6 */
 /* === GENERELLE STILER === */
 body {
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* En mer leken, avrundet font */
@@ -332,5 +332,31 @@ audio::-webkit-media-controls-panel {
   border-radius: 25px;
 }
 
+/* === UTVIKLER/TEST KNAPP === */
+.dev-reset-button {
+    background-color: #78909C; /* Blågrå, diskret farge */
+    color: white;
+    font-size: 0.8em; /* Mindre tekst */
+    padding: 8px 15px; /* Mindre padding */
+    margin-top: 30px; /* God avstand fra annet innhold */
+    border-radius: 6px;
+    text-transform: none; /* Ikke store bokstaver */
+    letter-spacing: normal;
+    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* Standard font */
+    box-shadow: 0 3px 0 #546E7A, 0 4px 6px rgba(0,0,0,0.15); /* Subtil skygge */
+}
+
+.dev-reset-button:hover {
+    background-color: #607D8B;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #546E7A, 0 5px 8px rgba(0,0,0,0.2);
+}
+
+.dev-reset-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 0 #546E7A, 0 2px 3px rgba(0,0,0,0.15);
+}
+
+
 /* Slutt på filen */
-/* Version: #4 */
+/* Version: #6 */
