@@ -1,10 +1,10 @@
-/* Version: #6 */
+/* Version: #7 */
 document.addEventListener('DOMContentLoaded', () => {
     // === HTML ELEMENT REFERENCES ===
     const teamCodeInput = document.getElementById('team-code-input');
     const startWithTeamCodeButton = document.getElementById('start-with-team-code-button');
     const teamCodeFeedback = document.getElementById('team-code-feedback');
-    const startSound = document.getElementById('start-sound');
+    const startSound = document.getElementById('start-sound'); // For kort start-effekt
 
     const pages = document.querySelectorAll('#rebus-content .page');
     const checkButtons = document.querySelectorAll('.check-answer-btn');
@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    const devResetButtons = document.querySelectorAll('.dev-reset-button'); // Hent alle reset-knapper
+    const devResetButtons = document.querySelectorAll('.dev-reset-button');
+
+    // Musikkontroller elementer
+    const backgroundAudio = document.getElementById('background-audio');
+    const playPauseButton = document.getElementById('play-pause-button');
+    const muteUnmuteButton = document.getElementById('mute-unmute-button');
+    const volumeSlider = document.getElementById('volume-slider');
 
     // === CONFIGURATION ===
     const TOTAL_POSTS = 8;
@@ -52,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (container) {
                  window.scrollTo({ top: container.offsetTop - 20, behavior: 'smooth' });
             }
-             // Når vi bytter side, må vi også sørge for at inputfelt og knapper er i riktig tilstand
             resetPageUI(pageId);
         } else {
             console.error("Kunne ikke finne rebus-side med ID:", pageId);
@@ -83,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentTeamData) {
             localStorage.setItem('activeTeamData', JSON.stringify(currentTeamData));
         } else {
-            localStorage.removeItem('activeTeamData'); // Sørg for å fjerne hvis currentTeamData er null
+            localStorage.removeItem('activeTeamData');
         }
     }
 
@@ -94,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentTeamData = JSON.parse(savedData);
                 if (!currentTeamData || typeof currentTeamData.completedPostsCount === 'undefined' || !currentTeamData.postSequence) {
                     console.warn("Ugyldig lagret state, tømmer.");
-                    clearState(); // clearState vil også sette currentTeamData til null
+                    clearState();
                     return false;
                 }
                 return true;
@@ -104,19 +109,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
         }
-        currentTeamData = null; // Sørg for at den er null hvis ingen savedData
+        currentTeamData = null;
         return false;
     }
 
     function clearState() {
         localStorage.removeItem('activeTeamData');
         currentTeamData = null;
-        // Når state tømmes, må vi også resette UI for alle poster
         resetAllPostUIs();
     }
     
     function resetPageUI(pageId) {
-        if (pageId === 'intro-page' || pageId === 'finale-page') return; // Ingen input/knapper å resette her på samme måte
+        if (pageId === 'intro-page' || pageId === 'finale-page') return;
 
         const postNumberMatch = pageId.match(/post-(\d+)-page/);
         if (!postNumberMatch) return;
@@ -126,12 +130,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const buttonElement = document.querySelector(`.check-answer-btn[data-post="${postNumberGlobal}"]`);
         const feedbackElement = document.getElementById(`feedback-${postNumberGlobal}`);
 
-        // Hvis det ikke er lagdata, eller denne posten ikke er fullført av laget, aktiver input/knapp
         const isCompletedByTeam = currentTeamData && currentTeamData.completedGlobalPosts && currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`];
 
         if (inputElement) {
-            inputElement.disabled = !!isCompletedByTeam; // Dobbel not for å sikre boolean
-            if (!isCompletedByTeam) inputElement.value = ''; // Tøm input hvis ikke fullført
+            inputElement.disabled = !!isCompletedByTeam;
+            if (!isCompletedByTeam) inputElement.value = '';
         }
         if (buttonElement) {
             buttonElement.disabled = !!isCompletedByTeam;
@@ -165,14 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 feedbackElement.className = 'feedback';
             }
         }
-        // Tøm også lagkode-input og feedback
         if(teamCodeInput) teamCodeInput.value = '';
         if(teamCodeFeedback) {
             teamCodeFeedback.textContent = '';
             teamCodeFeedback.className = 'feedback';
         }
     }
-
 
     function initializeTeam(teamCode) {
         const teamKey = teamCode.trim().toUpperCase();
@@ -190,14 +191,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 completedGlobalPosts: {}
             };
             saveState();
-            resetAllPostUIs(); // Sørg for at alle UIer er resatt før vi starter et nytt lag
+            resetAllPostUIs(); 
 
-            if (startSound) {
-                startSound.play().catch(e => console.warn("Kunne ikke spille startlyd:", e));
+            if (startSound) { // Dette er den korte lyden for rebus start
+                startSound.play().catch(e => console.warn("Kunne ikke spille start-effekt:", e));
+            }
+            // Forsøk å starte bakgrunnsmusikk hvis den ikke allerede spiller (f.eks. pga autoplay policy)
+            if (backgroundAudio && backgroundAudio.paused) {
+                backgroundAudio.play().then(() => {
+                    playPauseButton.textContent = '⏸️';
+                }).catch(e => console.warn("Bakgrunnsmusikk kunne ikke starte automatisk etter lagstart:", e));
             }
             
             const firstPostInSequence = currentTeamData.postSequence[0];
-            showRebusPage(`post-${firstPostInSequence}-page`); // resetPageUI vil bli kalt inni her
+            showRebusPage(`post-${firstPostInSequence}-page`);
             console.log(`Team ${currentTeamData.name} startet! Første post: post-${firstPostInSequence}-page`);
         } else {
             teamCodeFeedback.textContent = 'Ugyldig lagkode. Prøv igjen!';
@@ -217,25 +224,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Bare oppdater hvis denne posten ikke allerede var fullført og talt
         if (!currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`]) {
             currentTeamData.completedGlobalPosts[`post${postNumberGlobal}`] = true;
             currentTeamData.completedPostsCount++;
         }
         
-        currentTeamData.currentPostArrayIndex++; // Gå til neste indeks i lagets sekvens
+        currentTeamData.currentPostArrayIndex++;
         saveState();
 
         if (currentTeamData.completedPostsCount < TOTAL_POSTS) {
-            // Sjekk om vi har en gyldig neste post i sekvensen
             if (currentTeamData.currentPostArrayIndex < currentTeamData.postSequence.length) {
                 const nextPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
                 setTimeout(() => {
                     showRebusPage(`post-${nextPostGlobalId}-page`);
                 }, 1200);
             } else {
-                // Dette skal egentlig ikke skje hvis completedPostsCount < TOTAL_POSTS,
-                // men som en fallback hvis sekvensen er kortere enn TOTAL_POSTS.
                 console.warn("Fullført færre enn TOTAL_POSTS, men ingen flere poster i sekvensen. Viser finale.");
                 setTimeout(() => {
                     showRebusPage('finale-page');
@@ -250,10 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateUIAfterLoad() {
         if (!currentTeamData || !currentTeamData.completedGlobalPosts) {
-            resetAllPostUIs(); // Hvis ingen lagdata, eller manglende data, resettes alt.
+            resetAllPostUIs();
             return;
         }
-        // Gå gjennom alle poster og sett UI basert på lagret tilstand
         for (let i = 1; i <= TOTAL_POSTS; i++) {
             const postKey = `post${i}`;
             const inputElement = document.getElementById(`post-${i}-input`);
@@ -276,8 +278,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // === MUSIKK KONTROLL FUNKSJONER ===
+    function setupMusicControls() {
+        if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) {
+            console.warn("Ett eller flere musikk-kontroll elementer mangler.");
+            return;
+        }
 
-    // === EVENT LISTENERS ===
+        // Last inn preferanser
+        const savedVolume = localStorage.getItem('rebusMusicVolume');
+        const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true';
+
+        if (savedVolume !== null) {
+            backgroundAudio.volume = parseFloat(savedVolume);
+            volumeSlider.value = parseFloat(savedVolume);
+        } else {
+            backgroundAudio.volume = 0.5; // Default volum
+            volumeSlider.value = 0.5;
+        }
+
+        backgroundAudio.muted = savedMuted;
+        muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊';
+
+        // Event listeners for musikk-kontroller
+        playPauseButton.addEventListener('click', () => {
+            if (backgroundAudio.paused) {
+                backgroundAudio.play()
+                    .then(() => playPauseButton.textContent = '⏸️')
+                    .catch(e => console.error("Feil ved avspilling av musikk:", e));
+            } else {
+                backgroundAudio.pause();
+                playPauseButton.textContent = '▶️';
+            }
+        });
+
+        muteUnmuteButton.addEventListener('click', () => {
+            backgroundAudio.muted = !backgroundAudio.muted;
+            muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊';
+            localStorage.setItem('rebusMusicMuted', backgroundAudio.muted);
+        });
+
+        volumeSlider.addEventListener('input', () => {
+            backgroundAudio.volume = volumeSlider.value;
+            localStorage.setItem('rebusMusicVolume', volumeSlider.value);
+            // Hvis dempet og volum endres, fjern demping for umiddelbar feedback
+            if (backgroundAudio.muted && backgroundAudio.volume > 0) {
+                backgroundAudio.muted = false;
+                muteUnmuteButton.textContent = '🔊';
+                localStorage.setItem('rebusMusicMuted', false);
+            }
+        });
+
+        // Forsøk autoplay (kan feile pga browser policy)
+        // Vi gjør dette her for å sikre at volum/mute er satt fra localStorage først
+        backgroundAudio.play()
+            .then(() => {
+                playPauseButton.textContent = '⏸️'; // Musikk spiller
+            })
+            .catch(error => {
+                console.warn('Autoplay av bakgrunnsmusikk forhindret:', error);
+                playPauseButton.textContent = '▶️'; // Musikk er pauset, klar for brukerstart
+            });
+    }
+
+
+    // === EVENT LISTENERS (GENERELT) ===
     if (startWithTeamCodeButton) {
         startWithTeamCodeButton.addEventListener('click', () => {
             initializeTeam(teamCodeInput.value);
@@ -379,13 +444,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Event listener for dev reset buttons
     devResetButtons.forEach(button => {
         button.addEventListener('click', () => {
             if (confirm("Er du sikker på at du vil nullstille og gå tilbake til start?\n(Dette er en testfunksjon)")) {
                 clearState();
                 showRebusPage('intro-page');
-                // Sørg for at lagkode-input er klar
                 if (teamCodeInput) {
                     teamCodeInput.value = '';
                     teamCodeInput.disabled = false;
@@ -402,7 +465,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // === INITIALIZATION ===
-    if (loadState()) { // loadState setter currentTeamData hvis data finnes
+    setupMusicControls(); // Sett opp musikk-kontroller og last preferanser
+
+    if (loadState()) { 
         showTabContent('rebus');
         if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) {
             showRebusPage('finale-page');
@@ -419,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 showRebusPage(`post-${currentExpectedPostId}-page`);
             }
-        } else { // Hvis loadState returnerte true men currentTeamData av en eller annen grunn er null
+        } else { 
             clearState();
             showRebusPage('intro-page');
         }
@@ -428,8 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         showTabContent('rebus');
         showRebusPage('intro-page');
-        resetAllPostUIs(); // Sørg for at UI er ren hvis ingen state lastes
+        resetAllPostUIs(); 
     }
 
 }); // Slutt på DOMContentLoaded
-/* Version: #6 */
+/* Version: #7 */
