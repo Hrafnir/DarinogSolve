@@ -1,4 +1,4 @@
-<!-- Version: #3 -->
+<!-- Version: #5 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -159,13 +159,25 @@
 
         </div> <!-- Slutt på rebus-content -->
 
-        <!-- Innhold for Kart -->
+        <!-- Innhold for Kart (MED DIN EMBED-KODE) -->
         <div id="map-content" class="tab-content">
             <h2>Kart over området</h2>
-            <p>Her vil det komme et kart som kan hjelpe dere med å finne frem til postene. Foreløpig, bruk stedsbeskrivelsene nøye!</p>
-            <!-- Du kan legge inn et generisk bilde her hvis du vil, eller vente til du har et spesifikt kart -->
-            <!-- <img src="images/generisk_kart_plassholder.png" alt="Kart over rebusløp-området" style="max-width: 100%; height: auto; border: 1px solid #ccc; margin-top: 15px;"> -->
-            <p style="font-size: 0.9em; margin-top: 10px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
+            <p>Bruk dette interaktive kartet for å finne frem. Du kan zoome og flytte på det!</p>
+            
+            <div id="google-map-container">
+                <!-- DIN EMBED-KODE ER SATT INN HER -->
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1528.8390196109551!2d10.64472518698282!3d60.80025412557211!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sno!2sno!4v1746863340505!5m2!1sno!2sno" 
+                    width="600" 
+                    height="450" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy" 
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+             
+            <p style="font-size: 0.9em; margin-top: 15px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
         </div>
 
     </div> <!-- Slutt på container -->
@@ -173,4 +185,4 @@
     <script src="script.js"></script>
 </body>
 </html>
-<!-- Version: #3 -->
+<!-- Version: #5 -->
