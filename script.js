@@ -1,10 +1,11 @@
-/* Version: #17 */
+/* Version: #18 */
 
 // === GLOBALE VARIABLER FOR KART ===
 let map;
 let currentMapMarker;
 let userPositionMarker;
-let mapElement; // Vil bli satt i DOMContentLoaded
+let mapElement; 
+let currentTeamData = null; // Deklarer currentTeamData globalt og initialiser til null
 
 // === KONFIGURASJON FOR KART (Globalt tilgjengelig for initMap) ===
 const POST_LOCATIONS = [
@@ -21,11 +22,7 @@ const START_LOCATION = { lat: 60.801211826268066, lng: 10.645566533162912, title
 const FINISH_LOCATION = { lat: 60.80140295692265, lng: 10.643869988530302, title: "Mål!" };
 
 // === GLOBALE KARTFUNKSJONER ===
-// Disse må være globale for at initMap skal kunne kalle dem,
-// og for at de skal kunne kalle hverandre utenfor DOMContentLoaded-scopet
-// hvis de ikke er avhengige av variabler som kun settes der.
-
-function updateMapMarker(postGlobalId) { 
+function updateMapMarker(postGlobalId) { /* ... (som i versjon #17) ... */ 
     if (!map) { console.warn("Kart ikke initialisert for updateMapMarker."); return; }
     if (postGlobalId < 1 || postGlobalId > POST_LOCATIONS.length) { console.error("Ugyldig post ID for kartmarkør:", postGlobalId); clearMapMarker(); return; }
     const location = POST_LOCATIONS[postGlobalId - 1];
@@ -38,12 +35,10 @@ function updateMapMarker(postGlobalId) {
     map.panTo({ lat: location.lat, lng: location.lng });
     if (map.getZoom() < 17) map.setZoom(17);
 }
-
-function clearMapMarker() { 
+function clearMapMarker() { /* ... (som i versjon #17) ... */ 
     if (currentMapMarker) { currentMapMarker.setMap(null); currentMapMarker = null; } 
 }
-
-function handleGeolocationError(error) { 
+function handleGeolocationError(error) { /* ... (som i versjon #17) ... */ 
     let msg = "Posisjonsfeil ved henting: ";
     switch (error.code) {
         case error.PERMISSION_DENIED: msg += "Bruker nektet tillatelse."; break;
@@ -53,8 +48,7 @@ function handleGeolocationError(error) {
     }
     console.warn(msg);
 }
-
-function showUserPosition() { 
+function showUserPosition() { /* ... (som i versjon #17) ... */ 
     if (!map) { console.warn("Kart ikke klar for å vise brukerposisjon."); return; }
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -65,25 +59,21 @@ function showUserPosition() {
                     position: userPos, map: map, title: "Din Posisjon",
                     icon: { path: google.maps.SymbolPath.CIRCLE, scale: 8, fillColor: "#4285F4", fillOpacity: 1, strokeWeight: 2, strokeColor: "white" }
                 });
-                console.log("Brukerposisjon vist (enkeltvisning for initMap):", userPos);
+                console.log("Brukerposisjon vist (enkeltvisning for initMap/showUserPosition):", userPos);
             }, 
-            handleGeolocationError, // Bruker den globale error handleren
+            handleGeolocationError,
             { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     } else { console.warn("Geolocation støttes ikke av denne nettleseren (sjekket i showUserPosition)."); }
 }
 
-
 // === GOOGLE MAPS API CALLBACK ===
 window.initMap = function() { 
-    mapElement = document.getElementById('dynamic-map-container'); // Hent elementet her, etter at DOM er klar
+    mapElement = document.getElementById('dynamic-map-container'); 
     if (!mapElement) { 
         console.error("Kart-element #dynamic-map-container ikke funnet under initMap."); 
-        // Prøv å vente litt og se om DOM blir klar, dette er en fallback
-        setTimeout(window.initMap, 500);
-        return;
+        setTimeout(window.initMap, 500); return;
     }
-
     const mapStyles = [ { featureType: "all", elementType: "labels", stylers: [{ visibility: "off" }] } ];
     map = new google.maps.Map(mapElement, {
         center: START_LOCATION, zoom: 17, mapTypeId: google.maps.MapTypeId.SATELLITE, 
@@ -91,51 +81,40 @@ window.initMap = function() {
         disableDefaultUI: false, streetViewControl: false, fullscreenControl: true,
         mapTypeControlOptions: { style: google.maps.MapTypeControlStyle.DROPDOWN_MENU, mapTypeIds: [google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID] }
     });
-
     new google.maps.Marker({ position: START_LOCATION, map: map, title: START_LOCATION.title });
     new google.maps.Marker({ 
         position: FINISH_LOCATION, map: map, title: FINISH_LOCATION.title, 
         icon: { url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png' }
     });
-    
-    // Sjekk om currentTeamData er definert (kan skje hvis DOMContentLoaded kjører før initMap og setter den)
-    // Dette er litt avhengig av lastetider, så vi legger til en sjekk.
-    // Den primære oppdateringen av markør skjer nå fra DOMContentLoaded etter loadState.
-    if (typeof currentTeamData !== 'undefined' && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) {
+    if (currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { // currentTeamData sjekkes her
         const currentPostGlobalId = currentTeamData.postSequence[currentTeamData.currentPostArrayIndex];
         updateMapMarker(currentPostGlobalId);
-    } else if (typeof currentTeamData !== 'undefined' && currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { 
+    } else if (currentTeamData && currentTeamData.completedPostsCount >= TOTAL_POSTS) { 
         clearMapMarker(); 
     }
-    showUserPosition(); // Prøv å vise brukerposisjon når kartet er klart
+    showUserPosition(); 
     console.log("Google Map initialisert via window.initMap");
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     // === HTML ELEMENT REFERENCES (hentes etter at DOM er klar) ===
     const teamCodeInput = document.getElementById('team-code-input');
     const startWithTeamCodeButton = document.getElementById('start-with-team-code-button');
     const teamCodeFeedback = document.getElementById('team-code-feedback');
-
     const pages = document.querySelectorAll('#rebus-content .page');
     const unlockPostButtons = document.querySelectorAll('.unlock-post-btn');
     const checkTaskButtons = document.querySelectorAll('.check-task-btn');
-
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
     const devResetButtons = document.querySelectorAll('.dev-reset-button');
-
     const backgroundAudio = document.getElementById('background-audio');
     const playPauseButton = document.getElementById('play-pause-button');
     const muteUnmuteButton = document.getElementById('mute-unmute-button');
     const volumeSlider = document.getElementById('volume-slider');
-    // mapElement settes i initMap, men vi kan også referere til den her hvis nødvendig senere
-    
     const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button');
     const gpsAudioVolumeSlider = document.getElementById('gps-audio-volume-slider');
 
-    // === GPS AUDIO HJELP VARIABLER (forblir i DOMContentLoaded da de styrer UI/logikk derfra) ===
+    // === GPS AUDIO HJELP VARIABLER ===
     let audioContext; 
     let proximityBeepIntervalId = null; 
     let isGpsAudioEnabled = false;
@@ -144,8 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === KONFIGURASJON (kun de som ikke trengs globalt av initMap) ===
     const TOTAL_POSTS = 8;
-    // POST_LOCATIONS, START_LOCATION, FINISH_LOCATION er nå globale
-
     const TEAM_CONFIG = {
         "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] },
         "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] },
@@ -161,36 +138,23 @@ document.addEventListener('DOMContentLoaded', () => {
         post5: "GROOT", post6: "NÅL", post7: "BLÅ", post8: "SVAMP"
     };
 
-    // currentTeamData må være tilgjengelig for initMap, så vi deklarerer den utenfor,
-    // men initialiserer den (eller laster den) her.
-    // Den er allerede deklarert globalt, så vi bare bruker den.
-    // let currentTeamData = null; // FJERN DENNE LINJEN, den er global nå.
-
-    // === GPS AUDIO HJELP FUNKSJONER (de som er avhengige av variabler i DOMContentLoaded) ===
-    function initializeAudioContext() {
-        if (!audioContext) {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
+    // === GPS AUDIO HJELP FUNKSJONER ===
+    function initializeAudioContext() { /* ... (som i versjon #17) ... */ 
+        if (!audioContext) { audioContext = new (window.AudioContext || window.webkitAudioContext)(); }
     }
-    function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume) {
+    function playBeep(frequency = 880, duration = 100, volume = gpsAudioVolume) { /* ... (som i versjon #17) ... */ 
         if (!audioContext || !isGpsAudioEnabled) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        gainNode.gain.setValueAtTime(volume * 0.5, audioContext.currentTime); // Bruk den justerte gpsAudioVolume
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + duration / 1000);
+        const oscillator = audioContext.createOscillator(); const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode); gainNode.connect(audioContext.destination);
+        oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(volume * 0.5, audioContext.currentTime); 
+        oscillator.start(); oscillator.stop(audioContext.currentTime + duration / 1000);
     }
-    function calculateDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; 
-        const φ1 = lat1 * Math.PI / 180; const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180; const Δλ = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; 
+    function calculateDistance(lat1, lon1, lat2, lon2) { /* ... (som i versjon #17) ... */ 
+        const R = 6371e3; const φ1 = lat1 * Math.PI/180; const φ2 = lat2 * Math.PI/180;
+        const Δφ = (lat2-lat1) * Math.PI/180; const Δλ = (lon2-lon1) * Math.PI/180;
+        const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); return R * c;
     }
     function updateProximityBeeps(position) {
         if (!isGpsAudioEnabled || !currentTeamData || currentTeamData.completedPostsCount >= TOTAL_POSTS) {
@@ -198,10 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const userLat = position.coords.latitude; const userLng = position.coords.longitude;
         const nextPostIndexInSequence = currentTeamData.currentPostArrayIndex;
-        // Sørg for at vi har en gyldig neste post
-        if (nextPostIndexInSequence >= currentTeamData.postSequence.length) {
-            stopProximityBeeps(); return;
-        }
+        if (nextPostIndexInSequence >= currentTeamData.postSequence.length) { stopProximityBeeps(); return; }
         const nextPostGlobalId = currentTeamData.postSequence[nextPostIndexInSequence];
         if (nextPostGlobalId === undefined || nextPostGlobalId < 1 || nextPostGlobalId > POST_LOCATIONS.length) {
             stopProximityBeeps(); return;
@@ -210,38 +171,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const distance = calculateDistance(userLat, userLng, targetLocation.lat, targetLocation.lng);
         console.log(`Avstand til Post ${nextPostGlobalId}: ${distance.toFixed(0)}m`);
         let beepInterval = 0; let beepFrequency = 880; let beepDuration = 100;
+
+        // JUSTERT PIPING
         if (distance <= 5) { beepInterval = 300; beepFrequency = 1200; beepDuration = 80; } 
         else if (distance <= 10) { beepInterval = 600; beepFrequency = 1000; } 
         else if (distance <= 25) { beepInterval = 1000; } 
         else if (distance <= 50) { beepInterval = 2000; } 
         else if (distance <= 100) { beepInterval = 3500; }
+        else if (distance > 100 ) { beepInterval = 7000; beepFrequency = 600; beepDuration = 150;} // Langsomt pip for > 100m
+
         if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
         if (beepInterval > 0) {
-            playBeep(beepFrequency, beepDuration, gpsAudioVolumeSlider.valueAsNumber); // Bruk aktuell slider verdi
+            playBeep(beepFrequency, beepDuration, gpsAudioVolumeSlider.valueAsNumber);
             proximityBeepIntervalId = setInterval(() => {
                 playBeep(beepFrequency, beepDuration, gpsAudioVolumeSlider.valueAsNumber);
             }, beepInterval);
         }
     }
-    function startProximityBeeps() {
-        if (!navigator.geolocation) {
-            console.warn("Geolocation ikke støttet."); isGpsAudioEnabled = false;
-            if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Av"; return;
-        }
-        if (positionWatchId !== null) return; // Allerede i gang
-        initializeAudioContext(); // Sørg for at AudioContext er klar
-        console.log("Starter GPS posisjonssporing for pip.");
+    function startProximityBeeps() { /* ... (som i versjon #17) ... */ 
+        if (!navigator.geolocation) { console.warn("Geolocation ikke støttet."); isGpsAudioEnabled = false; if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Av"; return; }
+        if (positionWatchId !== null) return; 
+        initializeAudioContext(); console.log("Starter GPS posisjonssporing for pip.");
         positionWatchId = navigator.geolocation.watchPosition(
             updateProximityBeeps, 
-            (error) => {
-                handleGeolocationError(error); // Bruker den globale error handleren
-                stopProximityBeeps(); 
-                if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Feil";
-            },
+            (error) => { handleGeolocationError(error); stopProximityBeeps(); if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Feil"; },
             { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
         );
     }
-    function stopProximityBeeps() {
+    function stopProximityBeeps() { /* ... (som i versjon #17) ... */ 
         if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; }
         if (positionWatchId !== null) { navigator.geolocation.clearWatch(positionWatchId); positionWatchId = null; console.log("Stoppet GPS sporing."); }
     }
@@ -255,26 +212,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume');
         isGpsAudioEnabled = savedGpsAudioEnabled;
         if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } 
-        else { gpsAudioVolumeSlider.value = gpsAudioVolume; } // gpsAudioVolume har default 0.7
+        else { gpsAudioVolumeSlider.value = gpsAudioVolume; }
         toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
-        // Start kun hvis aktivert OG et spill er i gang (currentTeamData finnes)
-        if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); }
+        
+        // FIKSET: Sjekk for currentTeamData før startProximityBeeps
+        if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { 
+            startProximityBeeps(); 
+        }
         
         toggleGpsAudioButton.addEventListener('click', () => {
             isGpsAudioEnabled = !isGpsAudioEnabled;
             toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av";
             localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled);
+            // FIKSET: Sjekk for currentTeamData også her
             if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startProximityBeeps(); } 
             else { stopProximityBeeps(); }
         });
         gpsAudioVolumeSlider.addEventListener('input', () => {
-            gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; // Oppdater den globale variabelen også
+            gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber;
             localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume);
         });
     }
 
     // === MUSIKK KONTROLL FUNKSJONER ===
-    // ... (setupMusicControls som før) ...
+    // ... (setupMusicControls som i versjon #17) ...
     function setupMusicControls() { 
         if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) {
             console.warn("Musikk-kontroll elementer mangler.");
@@ -332,8 +293,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === KJERNEFUNKSJONER (fortsetter) ===
-    // ... (showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad som før, men sørg for at de er her)
+    // === KJERNEFUNKSJONER (resten) ===
+    // ... (showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad - som i versjon #17)
     function showRebusPage(pageId) {
         pages.forEach(page => page.classList.remove('visible'));
         const nextPage = document.getElementById(pageId);
@@ -364,18 +325,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const savedData = localStorage.getItem('activeTeamData');
         if (savedData) {
             try {
-                currentTeamData = JSON.parse(savedData); // Nå tilordnes den globale currentTeamData
+                currentTeamData = JSON.parse(savedData); 
                 if (!currentTeamData || typeof currentTeamData.completedPostsCount === 'undefined' || !currentTeamData.postSequence || !currentTeamData.unlockedPosts) { 
                     clearState(); return false;
                 }
                 return true;
             } catch (e) { clearState(); return false; }
         }
-        currentTeamData = null; return false; // Sørg for at den globale er null
+        currentTeamData = null; return false; 
     }
     function clearState() {
         localStorage.removeItem('activeTeamData');
-        currentTeamData = null; // Nullstill den globale
+        currentTeamData = null; 
         resetAllPostUIs();
         clearMapMarker(); 
         if (userPositionMarker) { userPositionMarker.setMap(null); userPositionMarker = null; }
@@ -394,8 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskInput = document.getElementById(`post-${postNum}-task-input`);
         const taskButton = document.querySelector(`#post-${postNum}-page .check-task-btn`);
         const taskFeedback = document.getElementById(`feedback-task-${postNum}`);
-        const isPostUnlocked = currentTeamData?.unlockedPosts?.[`post${postNum}`]; // Bruk global currentTeamData
-        const isTaskCompleted = currentTeamData?.completedGlobalPosts?.[`post${postNum}`]; // Bruk global currentTeamData
+        const isPostUnlocked = currentTeamData?.unlockedPosts?.[`post${postNum}`]; 
+        const isTaskCompleted = currentTeamData?.completedGlobalPosts?.[`post${postNum}`]; 
         if (unlockSection && taskSection) {
             if (isTaskCompleted) { 
                 unlockSection.style.display = 'none'; taskSection.style.display = 'block';
@@ -436,14 +397,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const config = TEAM_CONFIG[teamKey];
         teamCodeFeedback.className = 'feedback'; teamCodeFeedback.textContent = '';
         if (config) {
-            currentTeamData = { ...config, id: teamKey, currentPostArrayIndex: 0, completedPostsCount: 0, completedGlobalPosts: {}, unlockedPosts: {} }; // Bruk global currentTeamData
+            currentTeamData = { ...config, id: teamKey, currentPostArrayIndex: 0, completedPostsCount: 0, completedGlobalPosts: {}, unlockedPosts: {} }; 
             saveState(); resetAllPostUIs(); 
             if (backgroundAudio && backgroundAudio.paused) {
                 backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => console.warn("Musikk auto-start feilet:", e.name, e.message));
             }
             const firstPostInSequence = currentTeamData.postSequence[0];
             showRebusPage(`post-${firstPostInSequence}-page`); 
-            if (map) updateMapMarker(firstPostInSequence); // Sjekk om kartet er klart
+            if (map) updateMapMarker(firstPostInSequence); 
             else console.warn("Kart ikke klart ved lagstart for å sette markør.");
             showUserPosition(); 
             if (isGpsAudioEnabled) { startProximityBeeps(); }
@@ -466,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userAnswer === correctUnlockCode.toUpperCase() || userAnswer === 'ÅPNE') {
             feedbackElement.textContent = 'Post låst opp! Her er oppgaven:'; feedbackElement.classList.add('success');
             if (unlockInput) unlockInput.disabled = true; document.querySelector(`#post-${postNum}-page .unlock-post-btn`).disabled = true;
-            if (!currentTeamData.unlockedPosts) currentTeamData.unlockedPosts = {}; // Sikkerhetssjekk
+            if (!currentTeamData.unlockedPosts) currentTeamData.unlockedPosts = {}; 
             currentTeamData.unlockedPosts[`post${postNum}`] = true; saveState();
             setTimeout(() => { resetPageUI(`post-${postNum}-page`); }, 800);
         } else {
@@ -523,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
     devResetButtons.forEach(button => { button.addEventListener('click', () => { if (confirm("Nullstille? (Test)")) { clearState(); showRebusPage('intro-page'); if (teamCodeInput) { teamCodeInput.value = ''; teamCodeInput.disabled = false; } if (teamCodeFeedback) { teamCodeFeedback.textContent = ''; teamCodeFeedback.className = 'feedback'; } if (startWithTeamCodeButton) startWithTeamCodeButton.disabled = false; } }); });
     
     // === INITIALIZATION ===
-    setupMusicControls(); // Denne er nå definert
+    setupMusicControls(); 
     setupGpsAudioControls(); 
     if (loadState()) { 
         showTabContent('rebus');
@@ -543,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUIAfterLoad(); 
         if(currentTeamData) {
             console.log(`Gjenopprettet tilstand for Team ${currentTeamData.name}.`);
-            if (isGpsAudioEnabled && currentTeamData.completedPostsCount < TOTAL_POSTS && map) { // Sjekk om kart er klart
+            if (isGpsAudioEnabled && currentTeamData.completedPostsCount < TOTAL_POSTS && typeof google !== 'undefined' && google.maps && map) { // Sjekk også om map er klart
                 startProximityBeeps();
             }
         }
@@ -552,4 +513,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
-/* Version: #17 */
+/* Version: #18 */
