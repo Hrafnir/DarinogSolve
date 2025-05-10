@@ -1,4 +1,4 @@
-/* Version: #6 */
+/* Version: #7 */
 /* === GENERELLE STILER === */
 body {
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* En mer leken, avrundet font */
@@ -11,6 +11,7 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23E6A465' fill-opacity='0.2'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); /* Subtil mønster */
+    padding-bottom: 70px; /* Legg til padding i bunnen for å unngå overlapp med faste musikk-kontroller */
 }
 
 .container {
@@ -316,21 +317,22 @@ button:disabled {
 }
 
 
-/* === LYDSPILLER === */
-audio {
-    border-radius: 25px; /* Avrundede kanter for lydspiller */
+/* === LYDSPILLER (GENERELL) === */
+audio { /* Gjelder for alle audio-elementer, inkl. start-sound hvis den vises */
+    border-radius: 25px;
     border: 2px solid #CD853F;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 100%; /* Gjør lydspilleren responsiv i bredden */
-    max-width: 400px; /* Men ikke bredere enn dette, for eksempel */
-    margin-left: auto; /* Sentrer hvis max-width trer i kraft */
+    width: 100%; 
+    max-width: 400px; 
+    margin-left: auto; 
     margin-right: auto;
+    display: block; /* For at margin auto skal fungere hvis den er i flyten */
 }
-/* Noen nettlesere tillater ikke mye styling av default controls, men dette er et forsøk */
 audio::-webkit-media-controls-panel {
-  background-color: #FFFACD; /* Lys gul */
+  background-color: #FFFACD; 
   border-radius: 25px;
 }
+
 
 /* === UTVIKLER/TEST KNAPP === */
 .dev-reset-button {
@@ -357,6 +359,82 @@ audio::-webkit-media-controls-panel {
     box-shadow: 0 1px 0 #546E7A, 0 2px 3px rgba(0,0,0,0.15);
 }
 
+/* === MUSIKK KONTROLLER === */
+#music-controls {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(244, 164, 96, 0.85); /* Sand-oransje med litt gjennomsiktighet */
+    padding: 8px 12px;
+    border-radius: 25px; /* Pilleform */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Mellomrom mellom elementene */
+    z-index: 1000; /* Sørg for at den er over annet innhold */
+    border: 2px solid #8B4513; /* Mørk brun kant, matcher tabs */
+}
+
+#music-controls button {
+    background-color: #FFF8DC; /* Korngul, matcher container */
+    color: #8B4513; /* Mørk brun tekst */
+    border: 1px solid #8B4513;
+    border-radius: 50%; /* Runde knapper */
+    width: 36px;
+    height: 36px;
+    padding: 0; /* Fjern padding for å sentrere ikonet bedre */
+    font-size: 1.2em; /* Størrelse på ikonet */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 0 #D2B48C, 0 3px 5px rgba(0,0,0,0.1);
+    margin-top: 0; /* Overstyr generell knapp-margin */
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#music-controls button:hover {
+    background-color: #FFFACD; /* Lysere gul */
+    transform: scale(1.1);
+}
+#music-controls button:active {
+    transform: scale(0.95);
+    box-shadow: 0 1px 0 #D2B48C;
+}
+
+#music-controls input[type="range"] {
+    width: 100px; /* Bredde på volumslider */
+    height: 8px;
+    -webkit-appearance: none; /* Fjern standard utseende på webkit */
+    appearance: none;
+    background: #FFF8DC; /* Bakgrunn på sporet */
+    border-radius: 5px;
+    border: 1px solid #8B4513;
+    cursor: pointer;
+}
+
+/* Styling for volumslider thumb (WebKit/Blink) */
+#music-controls input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #FF6347; /* Tomat-rød, matcher hovedknapper */
+    border-radius: 50%;
+    border: 1px solid #CD5C5C;
+    cursor: pointer;
+}
+
+/* Styling for volumslider thumb (Mozilla) */
+#music-controls input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #FF6347;
+    border-radius: 50%;
+    border: 1px solid #CD5C5C;
+    cursor: pointer;
+}
+
 
 /* Slutt på filen */
-/* Version: #6 */
+/* Version: #7 */
