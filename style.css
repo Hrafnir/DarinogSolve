@@ -1,4 +1,4 @@
-/* Version: #9 */
+/* Version: #10 */
 /* === GENERELLE STILER === */
 body {
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
@@ -11,7 +11,7 @@ body {
     align-items: flex-start;
     min-height: 100vh;
     background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23E6A465' fill-opacity='0.2'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    padding-bottom: 120px; /* Økt padding for å gi plass til BEGGE kontroll-settene */
+    padding-bottom: 70px; /* Justert tilbake, GPS-kontroller flyttes til venstre */
 }
 
 .container {
@@ -25,7 +25,7 @@ body {
     border: 3px solid #A0522D;
 }
 
-/* ... (resten av .tabs, .tab-button, .tab-content, .page, typografi, input, knapper, feedback, kart, lydspiller, dev-reset-button som i Versjon #8) ... */
+/* ... (resten av .tabs, .tab-button, .tab-content, .page, typografi, input, knapper, feedback, kart, lydspiller, dev-reset-button som i Versjon #9) ... */
 /* === TAB NAVIGASJON === */
 .tabs { margin-bottom: 30px; border-bottom: 3px dashed #A0522D; padding-bottom: 15px; }
 .tab-button { background-color: #F4A460; color: #FFFFFF; padding: 12px 25px; border: 2px solid #8B4513; border-bottom: none; border-radius: 15px 15px 0 0; cursor: pointer; font-size: 1.1em; font-weight: bold; margin: 0 5px -3px 0; transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease; position: relative; bottom: -3px; box-shadow: 0 -2px 5px rgba(0,0,0,0.1) inset; }
@@ -81,94 +81,122 @@ audio::-webkit-media-controls-panel { background-color: #FFFACD; border-radius: 
 .dev-reset-button { background-color: #78909C; color: white; font-size: 0.8em; padding: 8px 15px; margin-top: 30px; border-radius: 6px; text-transform: none; letter-spacing: normal; font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; box-shadow: 0 3px 0 #546E7A, 0 4px 6px rgba(0,0,0,0.15); }
 .dev-reset-button:hover { background-color: #607D8B; transform: translateY(-1px); box-shadow: 0 4px 0 #546E7A, 0 5px 8px rgba(0,0,0,0.2); }
 .dev-reset-button:active { transform: translateY(1px); box-shadow: 0 1px 0 #546E7A, 0 2px 3px rgba(0,0,0,0.15); }
-/* === MUSIKK KONTROLLER === */
-#music-controls { position: fixed; bottom: 10px; right: 10px; background-color: rgba(244, 164, 96, 0.85); padding: 8px 12px; border-radius: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; z-index: 1000; border: 2px solid #8B4513; }
-#music-controls button { background-color: #FFF8DC; color: #8B4513; border: 1px solid #8B4513; border-radius: 50%; width: 36px; height: 36px; padding: 0; font-size: 1.2em; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 0 #D2B48C, 0 3px 5px rgba(0,0,0,0.1); margin-top: 0; transition: background-color 0.2s ease, transform 0.1s ease; }
-#music-controls button:hover { background-color: #FFFACD; transform: scale(1.1); }
-#music-controls button:active { transform: scale(0.95); box-shadow: 0 1px 0 #D2B48C; }
-#music-controls input[type="range"] { width: 100px; height: 8px; -webkit-appearance: none; appearance: none; background: #FFF8DC; border-radius: 5px; border: 1px solid #8B4513; cursor: pointer; }
-#music-controls input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #FF6347; border-radius: 50%; border: 1px solid #CD5C5C; cursor: pointer; }
-#music-controls input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; background: #FF6347; border-radius: 50%; border: 1px solid #CD5C5C; cursor: pointer; }
 
-/* === GPS AUDIO KONTROLLER === */
-#gps-audio-controls {
+/* === MUSIKK KONTROLLER === */
+#music-controls {
     position: fixed;
-    bottom: 65px; /* Plasser den over de eksisterende musikk-kontrollene */
-    right: 10px;
-    background-color: rgba(120, 144, 156, 0.85); /* Blågrå, matcher dev-knapp */
-    padding: 8px 12px;
-    border-radius: 25px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    bottom: 10px;
+    right: 10px; /* Beholdt til høyre */
+    background-color: rgba(244, 164, 96, 0.9); /* Litt mindre gjennomsiktig */
+    padding: 6px 10px; /* Litt mindre padding */
+    border-radius: 20px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
     display: flex;
     align-items: center;
-    gap: 8px;
-    z-index: 999; /* Litt under musikk-kontroller hvis de overlapper */
-    border: 2px solid #546E7A;
+    gap: 6px; 
+    z-index: 1000; 
+    border: 2px solid #8B4513; 
+}
+#music-controls button {
+    width: 32px; /* Mindre knapp */
+    height: 32px;
+    font-size: 1em; /* Mindre ikon */
+    /* Resten av knappestyling som før, men arves fra generell knapp eller er lik */
+    background-color: #FFF8DC; color: #8B4513; border: 1px solid #8B4513; border-radius: 50%; padding: 0; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 0 #D2B48C, 0 3px 5px rgba(0,0,0,0.1); margin-top: 0; transition: background-color 0.2s ease, transform 0.1s ease;
+}
+#music-controls button:hover { background-color: #FFFACD; transform: scale(1.1); }
+#music-controls button:active { transform: scale(0.95); box-shadow: 0 1px 0 #D2B48C; }
+#music-controls input[type="range"] {
+    width: 80px; /* Smalere slider */
+    height: 6px;
+    /* Resten som før */
+    -webkit-appearance: none; appearance: none; background: #FFF8DC; border-radius: 5px; border: 1px solid #8B4513; cursor: pointer;
+}
+#music-controls input[type="range"]::-webkit-slider-thumb { width: 14px; height: 14px; /* Litt mindre tommel */ background: #FF6347; border-radius: 50%; border: 1px solid #CD5C5C; cursor: pointer; -webkit-appearance: none; appearance: none; }
+#music-controls input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; background: #FF6347; border-radius: 50%; border: 1px solid #CD5C5C; cursor: pointer; }
+
+
+/* === GPS AUDIO KONTROLLER (JUSTERT) === */
+#gps-audio-controls {
+    position: fixed;
+    bottom: 10px; /* Samme bunn-margin som musikk-kontroller */
+    left: 10px;   /* Flyttet til venstre */
+    background-color: rgba(108, 122, 137, 0.88); /* Litt mørkere, mer dempet blågrå */
+    padding: 5px 8px; /* Mindre padding */
+    border-radius: 18px; /* Litt mindre avrunding */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Mindre mellomrom */
+    z-index: 1000; /* Samme z-index, de skal ikke overlappe nå */
+    border: 2px solid #34495E; /* Mørkere kant */
 }
 
 #gps-audio-controls button {
-    background-color: #ECEFF1; /* Lys gråblå */
-    color: #37474F; /* Mørk gråblå tekst */
-    border: 1px solid #546E7A;
-    border-radius: 8px; /* Litt mindre rund enn musikk-knapper */
-    width: auto; /* La bredden tilpasse seg teksten */
-    height: 36px;
-    padding: 0 10px; /* Padding for tekst */
-    font-size: 0.9em; /* Litt mindre tekst */
-    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* Standard font */
-    text-transform: none; /* Ikke store bokstaver */
+    background-color: #DADFE1; /* Lysere grå */
+    color: #2C3E50; 
+    border: 1px solid #7F8C8D;
+    border-radius: 6px; 
+    height: 30px; /* Mindre knapp */
+    padding: 0 8px; 
+    font-size: 0.8em; 
+    font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; 
+    text-transform: none; 
     letter-spacing: normal;
-    box-shadow: 0 2px 0 #90A4AE, 0 3px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 0 #BDC3C7, 0 2px 3px rgba(0,0,0,0.1);
     margin-top: 0;
+    min-width: 80px; /* Sørg for at knappen har litt bredde for teksten */
+    text-align: center;
 }
 
 #gps-audio-controls button:hover {
-    background-color: #CFD8DC;
-    transform: scale(1.05);
+    background-color: #CACFD2;
+    transform: scale(1.03);
 }
 #gps-audio-controls button:active {
-    transform: scale(0.98);
-    box-shadow: 0 1px 0 #90A4AE;
+    transform: scale(0.97);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 }
 
 #gps-audio-controls input[type="range"] {
-    width: 80px; /* Litt smalere enn musikk-volum */
-    height: 8px;
+    width: 60px; /* Enda smalere slider */
+    height: 5px; /* Tynnere */
     -webkit-appearance: none;
     appearance: none;
-    background: #ECEFF1;
-    border-radius: 5px;
-    border: 1px solid #546E7A;
+    background: #DADFE1;
+    border-radius: 4px;
+    border: 1px solid #7F8C8D;
     cursor: pointer;
 }
 
 #gps-audio-controls input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 16px;
-    height: 16px;
-    background: #78909C; /* Blågrå */
+    width: 12px; /* Mindre tommel */
+    height: 12px;
+    background: #5D6D7E; /* Mørk gråblå tommel */
     border-radius: 50%;
-    border: 1px solid #546E7A;
+    border: 1px solid #34495E;
     cursor: pointer;
 }
 
 #gps-audio-controls input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: #78909C;
+    width: 10px;
+    height: 10px;
+    background: #5D6D7E;
     border-radius: 50%;
-    border: 1px solid #546E7A;
+    border: 1px solid #34495E;
     cursor: pointer;
 }
 
 #gps-audio-controls label {
-    color: #ECEFF1; /* Lys tekst for label */
-    font-size: 0.8em;
-    margin-left: 5px;
+    color: #ECF0F1; /* Lysere tekst for label */
+    font-size: 0.75em; /* Mindre label */
+    margin-left: 3px;
+    margin-right: 2px; /* Litt plass før slideren */
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
 }
 
 
 /* Slutt på filen */
-/* Version: #9 */
+/* Version: #10 */
