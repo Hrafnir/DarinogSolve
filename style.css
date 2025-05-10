@@ -1,4 +1,4 @@
-/* Version: #2 */
+/* Version: #4 */
 /* === GENERELLE STILER === */
 body {
     font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif; /* En mer leken, avrundet font */
@@ -285,13 +285,32 @@ button:disabled {
   80% { transform: translateX(4px) rotate(1deg); }
 }
 
-/* === KART SEKSJON === */
-#map-content img {
-    border: 4px solid #A0522D !important; /* Tykkere, mørk brun kant rundt kartet */
-    border-radius: 10px; /* Avrundede kanter på kartet */
+/* === KART SEKSJON (MODIFISERT FOR IFRAME) === */
+#map-content #google-map-container {
+    margin-top: 15px; /* Litt luft over kartet */
+    margin-bottom: 15px; /* Litt luft under kartet */
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding-top: 75%; /* Aspect ratio 4:3 (kan justeres, 75% = height/width) */
+                    /* For 16:9, bruk 56.25% */
+    border: 4px solid #A0522D; /* Tykkere, mørk brun kant rundt kart-containeren */
+    border-radius: 10px; /* Avrundede kanter på kart-containeren */
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
-#map-content p {
+
+#map-content #google-map-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    border: none; /* Fjern standard iframe kant, vi har på containeren */
+}
+
+#map-content p { /* Gjelder p-taggene i map-content */
     font-style: italic;
     color: #795548; /* Litt lysere brun for karttekst */
 }
@@ -302,24 +321,16 @@ audio {
     border-radius: 25px; /* Avrundede kanter for lydspiller */
     border: 2px solid #CD853F;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 100%; /* Gjør lydspilleren responsiv i bredden */
+    max-width: 400px; /* Men ikke bredere enn dette, for eksempel */
+    margin-left: auto; /* Sentrer hvis max-width trer i kraft */
+    margin-right: auto;
 }
 /* Noen nettlesere tillater ikke mye styling av default controls, men dette er et forsøk */
 audio::-webkit-media-controls-panel {
   background-color: #FFFACD; /* Lys gul */
   border-radius: 25px;
 }
-audio::-webkit-media-controls-play-button,
-audio::-webkit-media-controls-mute-button,
-audio::-webkit-media-controls-timeline-container,
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display,
-audio::-webkit-media-controls-volume-slider-container {
-  /* Kan prøve å endre farger her, men støtten varierer */
-}
-
-/* For å prøve å bruke "Luckiest Guy" hvis den finnes lokalt eller lastes via @font-face (ikke inkludert her) */
-/* @import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap'); */
-/* Hvis du kan legge til Google Fonts, uncomment linjen over i din HTML <head> eller her */
 
 /* Slutt på filen */
-/* Version: #2 */
+/* Version: #4 */
