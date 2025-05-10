@@ -1,4 +1,4 @@
-<!-- Version: #16 -->
+<!-- Version: #17 -->
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -10,14 +10,14 @@
 <body>
 
     <div class="container">
-        <!-- ... (resten av .container innhold som før) ... -->
+
         <div class="tabs">
             <button class="tab-button active" data-tab="rebus">Rebus</button>
             <button class="tab-button" data-tab="map">Kart</button>
         </div>
 
         <div id="rebus-content" class="tab-content visible">
-            <!-- ... (intro-page og alle post-pages som før) ... -->
+
             <div id="intro-page" class="page visible">
                 <h1>Velkommen til Rebusløpet!</h1>
                 <p>Skriv inn lagkoden deres for å starte:</p>
@@ -26,17 +26,17 @@
                 <div class="feedback" id="team-code-feedback"></div>
             </div>
 
-            <!-- POST 1 -->
+            <!-- POST 1 (Global Post 1) -->
             <div id="post-1-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 1: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Beveg dere til posisjonen for <strong>Post 1</strong> (se kartet om nødvendig). Når dere er fremme, let etter en skjult ankomstkode. Tast inn koden her for å låse opp dagens første oppgave!</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Dere har nådd en ny post! Se dere rundt på stedet og finn ankomstkoden for å låse opp oppgaven.</p>
                     <input type="text" id="post-1-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="1">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-1"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 1: Gåtefull Start! 💡</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Gåtefull Start! 💡</h2>
                     <p>Jeg har byer, men ingen hus. Jeg har fjell, men ingen trær. Jeg har vann, men ingen fisk. Hva er jeg?</p>
                     <input type="text" id="post-1-task-input" placeholder="Skriv svaret på gåten">
                     <button class="check-task-btn" data-post="1">Sjekk Svar på Oppgave</button>
@@ -45,17 +45,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 2 -->
+            <!-- POST 2 (Global Post 2) -->
             <div id="post-2-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 2: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Turen går videre til <strong>Post 2</strong>! Finn ankomstkoden som er gjemt på stedet for å avsløre en bildeutfordring.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Ny post, nye muligheter! Finn ankomstkoden her for å avsløre en bildeutfordring.</p>
                     <input type="text" id="post-2-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="2">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-2"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 2: Hvem er på bildet? 🤔</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Hvem er på bildet? 🤔</h2>
                     <p>Under ser du et bilde. Hvem er dette (fullt navn på skuespilleren), ELLER hva heter karakteren han spiller i spillet Minecraft?</p>
                     <img src="images/kjendis1.png" alt="Bilde av Jack Black som Steve" style="max-width: 80%; margin: 10px auto; display: block; border: 2px solid #ccc;">
                     <input type="text" id="post-2-task-input" placeholder="Skriv fullt navn eller karakternavn">
@@ -65,17 +65,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 3 -->
+            <!-- POST 3 (Global Post 3) -->
             <div id="post-3-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 3: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Neste mål er <strong>Post 3</strong>. Let etter ankomstkoden der for å få instruksjoner om Tryms utfordring.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Vel fremme ved en ny post! Tast inn ankomstkoden for å motta Tryms utfordring.</p>
                     <input type="text" id="post-3-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="3">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-3"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 3: Tryms Tøffe Test! 🧗</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Tryms Tøffe Test! 🧗</h2>
                     <p>Agent Trym har en spesiell utfordring til dere! Finn ham i nærheten av denne posten (han har på seg en <strong>rød caps</strong>). Når dere finner ham, vil han gi dere en fysisk oppgave å løse. Når oppgaven er løst tilfredsstillende, vil Trym gi dere kodeordet for å fullføre denne posten i appen.</p>
                     <input type="text" id="post-3-task-input" placeholder="Skriv kodeordet fra Trym">
                     <button class="check-task-btn" data-post="3">Sjekk Svar på Oppgave</button>
@@ -84,17 +84,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 4 -->
+            <!-- POST 4 (Global Post 4) -->
             <div id="post-4-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 4: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Fortsett til <strong>Post 4</strong>! Finn ankomstkoden for å bryne dere på en ny gåte.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Godt jobbet så langt! Finn ankomstkoden på denne posten for å få en ny gåte.</p>
                     <input type="text" id="post-4-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="4">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-4"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 4: Ordlek-Mesteren 🧠</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Ordlek-Mesteren 🧠</h2>
                     <p>Hva er det som går og går, men aldri kommer til døren?</p>
                     <input type="text" id="post-4-task-input" placeholder="Skriv svaret på gåten">
                     <button class="check-task-btn" data-post="4">Sjekk Svar på Oppgave</button>
@@ -103,17 +103,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 5 -->
+            <!-- POST 5 (Global Post 5) -->
             <div id="post-5-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 5: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Godt jobba! Nå til <strong>Post 5</strong>. Let etter ankomstkoden for å se neste bildeutfordring.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Ny post venter! Tast inn ankomstkoden for å se neste bildeutfordring.</p>
                     <input type="text" id="post-5-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="5">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-5"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 5: Figurfinneren! 👾</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Figurfinneren! 👾</h2>
                     <p>Hvem er denne kjente figuren? Skriv navnet.</p>
                     <img src="images/figur1.png" alt="Bilde av Groot" style="max-width: 70%; margin: 10px auto; display: block; border: 2px solid #ccc;">
                     <input type="text" id="post-5-task-input" placeholder="Skriv navnet på figuren">
@@ -123,17 +123,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 6 -->
+            <!-- POST 6 (Global Post 6) -->
             <div id="post-6-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 6: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Dere er over halvveis! Dra til <strong>Post 6</strong> og finn ankomstkoden der.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Bra innsats! Finn ankomstkoden på denne posten for neste utfordring.</p>
                     <input type="text" id="post-6-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="6">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-6"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 6: Tenkeboksen Knekkes! 🧐</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Tenkeboksen Knekkes! 🧐</h2>
                     <p>Hva har et øye, men kan ikke se?</p>
                     <input type="text" id="post-6-task-input" placeholder="Skriv svaret på gåten">
                     <button class="check-task-btn" data-post="6">Sjekk Svar på Oppgave</button>
@@ -142,18 +142,18 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 7 -->
+            <!-- POST 7 (Global Post 7) -->
             <div id="post-7-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 7: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Nesten i mål! Finn veien til <strong>Post 7</strong> og let etter ankomstkoden.</p>
+                    <h2 class="post-title-placeholder">Neste Post: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Nesten i mål! Finn ankomstkoden på denne posten for å få en observasjonsoppgave.</p>
                     <input type="text" id="post-7-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="7">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-7"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 7: Øye for Detaljer! 🔎</h2>
-                    <p>Se på [et spesifikt objekt nær Post 7, f.eks. 'den store steinen']. Hvilken farge har [en bestemt detalj på objektet, f.eks. 'den største sprekken på steinen']?</p>
+                    <h2 class="post-task-title-placeholder">Oppgave: Øye for Detaljer! 🔎</h2>
+                    <p>Se på [et spesifikt objekt nær denne posten, f.eks. 'den store steinen']. Hvilken farge har [en bestemt detalj på objektet, f.eks. 'den største sprekken på steinen']?</p>
                     <input type="text" id="post-7-task-input" placeholder="Skriv fargen">
                     <button class="check-task-btn" data-post="7">Sjekk Svar på Oppgave</button>
                     <div class="feedback" id="feedback-task-7"></div>
@@ -161,17 +161,17 @@
                 <button class="dev-reset-button">Tilbake til Start (Test)</button>
             </div>
 
-            <!-- POST 8 -->
+            <!-- POST 8 (Global Post 8) -->
             <div id="post-8-page" class="page">
                 <div class="post-unlock-section">
-                    <h2>Post 8: Finn Ankomstkoden! 🗝️</h2>
-                    <p>Siste post før mål! Kom dere til <strong>Post 8</strong> og finn den siste ankomstkoden.</p>
+                    <h2 class="post-title-placeholder">Siste Post før Mål: Finn Ankomstkoden! 🗝️</h2>
+                    <p class="post-intro-placeholder">Dette er den siste ordinære posten! Finn ankomstkoden for å løse den siste gåten.</p>
                     <input type="text" id="post-8-unlock-input" placeholder="Skriv ankomstkoden">
                     <button class="unlock-post-btn" data-post="8">Lås opp Post</button>
                     <div class="feedback" id="feedback-unlock-8"></div>
                 </div>
                 <div class="post-task-section" style="display: none;">
-                    <h2>Post 8: Siste Nøtt! 🌰</h2>
+                    <h2 class="post-task-title-placeholder">Oppgave: Siste Nøtt! 🌰</h2>
                     <p>Hva er full av hull, men holder likevel på vann?</p>
                     <input type="text" id="post-8-task-input" placeholder="Skriv svaret på gåten">
                     <button class="check-task-btn" data-post="8">Sjekk Svar på Oppgave</button>
@@ -182,15 +182,16 @@
 
             <div id="finale-page" class="page">
                 <h1>FANTASTISK JOBBET! 🎉</h1>
-                <h2>Alle 8 poster er løst!</h2>
-                <p>Dere er ekte rebusmestre! Gå til samlingspunktet for premie!</p>
+                <h2>Alle 8 oppdrag er fullført!</h2>
+                <p>Dere er ekte rebusmestre! Nå gjenstår bare å finne veien til <strong>MÅLET: Hovedinngangen til kafeen!</strong></p>
+                <p>Bruk kartet for å se hvor det er. Lykke til med siste etappe!</p>
                 <button class="dev-reset-button" style="margin-top: 30px;">Start helt på nytt (Test)</button>
             </div>
         </div>
 
         <div id="map-content" class="tab-content">
             <h2>Kart over området</h2>
-            <p>Bruk dette interaktive kartet for å finne frem. Neste post vil bli markert!</p>
+            <p>Bruk dette interaktive kartet for å finne frem. Neste post eller målet vil bli markert!</p>
             <div id="dynamic-map-container"></div>
             <p style="font-size: 0.9em; margin-top: 15px;">(Trykk på 'Rebus'-fanen for å gå tilbake til oppgavene)</p>
         </div>
@@ -201,16 +202,13 @@
         <source src="audio/background_music.ogg" type="audio/ogg">
         Nettleseren din støtter ikke audio-elementet.
     </audio>
-
     <div id="music-controls">
         <button id="play-pause-button" title="Spill/Pause Musikk">▶️</button>
         <button id="mute-unmute-button" title="Demp/Lyd på Musikk">🔊</button>
         <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" title="Volum">
     </div>
-
-    <!-- NYTT: Kontroller for GPS Lydhjelp -->
     <div id="gps-audio-controls">
-        <button id="toggle-gps-audio-button" title="GPS Nærhetslyd På/Av">🔊 GPS Av</button>
+        <button id="toggle-gps-audio-button" title="GPS Nærhetslyd På/Av">🛰️ GPS Av</button>
         <label for="gps-audio-volume-slider" style="font-size:0.8em; color: white; margin-left: 5px;">Pip Volum:</label>
         <input type="range" id="gps-audio-volume-slider" min="0" max="1" step="0.01" value="0.7" title="Volum Pipelyd">
     </div>
@@ -222,4 +220,4 @@
 
 </body>
 </html>
-<!-- Version: #16 -->
+<!-- Version: #17 -->
