@@ -1,15 +1,36 @@
 /* Version: #24 */
 
 // === GLOBALE VARIABLER ===
-// ... (som i versjon #23) ...
-let map; let currentMapMarker; let userPositionMarker; let mapElement; let currentTeamData = null; let audioContext; let proximityBeepIntervalId = null; let isGpsAudioEnabled = false; let gpsAudioVolume = 0.7; let mapPositionWatchId = null; let previousDistanceToTarget = null; let finishMarker = null; let hasPlayedTargetReachedSound = false;
+let map;
+let currentMapMarker;
+let userPositionMarker;
+let mapElement; 
+let currentTeamData = null; 
+let audioContext; 
+let proximityBeepIntervalId = null; 
+let isGpsAudioEnabled = false;
+let gpsAudioVolume = 0.7; 
+let mapPositionWatchId = null;   
+let previousDistanceToTarget = null;
+let finishMarker = null;
+let hasPlayedTargetReachedSound = false;
 
 // === GLOBAL KONFIGURASJON ===
-// ... (TOTAL_POSTS, POST_LOCATIONS, START_LOCATION, FINISH_LOCATION som i versjon #23) ...
 const TOTAL_POSTS = 8; 
-const POST_LOCATIONS = [ { lat: 60.79604180682737, lng: 10.670735066773602, title: "Test Post 1", name: "Teststed 1 (Midlertidig)"}, { lat: 60.79640262601723, lng: 10.670890901998973, title: "Test Post 2", name: "Teststed 2 (Midlertidig)"}, { lat: 60.80072782302861, lng: 10.644889579638045, title: "Post 3", name: "På den lengste benken"}, { lat: 60.80048329479234, lng: 10.643492818098643, title: "Post 4", name: "Ved informasjonstavlen"}, { lat: 60.80045228531585, lng: 10.642988549931982, title: "Post 5", name: "Ved flaggstangen"}, { lat: 60.7998031467142, lng: 10.643149576741504, title: "Post 6", name: "Ved sykkelstativet"}, { lat: 60.7990979034987, lng: 10.64366234869697, title: "Post 7", name: "Ved steinmuren"}, { lat: 60.79974498905187, lng: 10.64269195029222, title: "Post 8", name: "Ved hovedinngangen til området"} ];
-const START_LOCATION = { lat: 60.801211826268066, lng: 10.645566533162912, title: "Start Rebus" };
-const FINISH_LOCATION = { lat: 60.80140295692265, lng: 10.643869988530302, title: "MÅL: Hovedinngang Kafe" };
+
+// OPPDATERTE POST_LOCATIONS MED NYE KOORDINATER OG NAVN/BESKRIVELSER
+const POST_LOCATIONS = [ 
+    { lat: 60.80084884569945, lng: 10.6463234296314, title: "Post 1", name: "Ved et kryss, bak en busk"},
+    { lat: 60.800510412337196, lng: 10.645692903164733, title: "Post 2", name: "Ved et gjerde"},
+    { lat: 60.79938483494348, lng: 10.641389850536111, title: "Post 3", name: "På en bru"},
+    { lat: 60.799861828827176, lng: 10.642960745470365, title: "Post 4", name: "Kongens stein"},
+    { lat: 60.799652789356685, lng: 10.64479766026886, title: "Post 5", name: "Den gamle discgolfbanen"},
+    { lat: 60.800155960923334, lng: 10.645328506396762, title: "Post 6", name: "Rød grillhytte"},
+    { lat: 60.798918806456385, lng: 10.643709924058388, title: "Post 7", name: "Ved stor furu"},
+    { lat: 60.79906536772302, lng: 10.642561938675641, title: "Post 8", name: "Ved blå dingser"}
+];
+const START_LOCATION = { lat: 60.801211826268066, lng: 10.645566533162912, title: "Start Rebus" }; // Beholdes som før, eller juster hvis de nye postene er langt unna
+const FINISH_LOCATION = { lat: 60.80140295692265, lng: 10.643869988530302, title: "MÅL: Hovedinngang Kafe" }; // Beholdes som før, eller juster
 
 // === GOOGLE MAPS API CALLBACK ===
 // ... (window.initMap som i versjon #23) ...
@@ -34,49 +55,19 @@ function updateProximitySoundLogic(position) { if (!currentTeamData || currentTe
 function startContinuousUserPositionUpdate() { const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button'); if (!navigator.geolocation) { console.warn("Geolocation ikke støttet."); isGpsAudioEnabled = false; if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Av"; localStorage.setItem('rebusGpsAudioEnabled', false); return; } if (mapPositionWatchId !== null) return; initializeAudioContext(); console.log("Starter kontinuerlig GPS posisjonssporing for kart og pip."); previousDistanceToTarget = null; mapPositionWatchId = navigator.geolocation.watchPosition( handlePositionUpdate, (error) => { handleGeolocationError(error); stopContinuousUserPositionUpdate(); if(toggleGpsAudioButton) toggleGpsAudioButton.textContent = "🛰️ GPS Feil"; isGpsAudioEnabled = false; localStorage.setItem('rebusGpsAudioEnabled', false); }, { enableHighAccuracy: true, maximumAge: 3000, timeout: 7000 } ); }
 function stopContinuousUserPositionUpdate() { if (proximityBeepIntervalId) { clearInterval(proximityBeepIntervalId); proximityBeepIntervalId = null; } if (mapPositionWatchId !== null) { navigator.geolocation.clearWatch(mapPositionWatchId); mapPositionWatchId = null; console.log("Stoppet kontinuerlig GPS sporing for kart og pip."); } previousDistanceToTarget = null; hasPlayedTargetReachedSound = false; }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    const teamCodeInput = document.getElementById('team-code-input');
-    const startWithTeamCodeButton = document.getElementById('start-with-team-code-button');
-    const teamCodeFeedback = document.getElementById('team-code-feedback');
-    const pages = document.querySelectorAll('#rebus-content .page');
-    const unlockPostButtons = document.querySelectorAll('.unlock-post-btn');
-    const checkTaskButtons = document.querySelectorAll('.check-task-btn');
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
-    const devResetButtons = document.querySelectorAll('.dev-reset-button');
-    const backgroundAudio = document.getElementById('background-audio');
-    const playPauseButton = document.getElementById('play-pause-button');
-    const muteUnmuteButton = document.getElementById('mute-unmute-button');
-    const volumeSlider = document.getElementById('volume-slider');
-    const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button');
-    const gpsAudioVolumeSlider = document.getElementById('gps-audio-volume-slider');
+    // === HTML ELEMENT REFERENCES ===
+    // ... (som i versjon #22) ...
+    const teamCodeInput = document.getElementById('team-code-input'); const startWithTeamCodeButton = document.getElementById('start-with-team-code-button'); const teamCodeFeedback = document.getElementById('team-code-feedback'); const pages = document.querySelectorAll('#rebus-content .page'); const unlockPostButtons = document.querySelectorAll('.unlock-post-btn'); const checkTaskButtons = document.querySelectorAll('.check-task-btn'); const tabButtons = document.querySelectorAll('.tab-button'); const tabContents = document.querySelectorAll('.tab-content'); const devResetButtons = document.querySelectorAll('.dev-reset-button'); const backgroundAudio = document.getElementById('background-audio'); const playPauseButton = document.getElementById('play-pause-button'); const muteUnmuteButton = document.getElementById('mute-unmute-button'); const volumeSlider = document.getElementById('volume-slider'); const toggleGpsAudioButton = document.getElementById('toggle-gps-audio-button'); const gpsAudioVolumeSlider = document.getElementById('gps-audio-volume-slider');
     
-    const TEAM_CONFIG = {
-        "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] },
-        "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] },
-        "RICO": { name: "Team Rico", startPostId: "post-5-page", postSequence: [5, 6, 7, 8, 1, 2, 3, 4] },
-        "MENIG": { name: "Team Menig", startPostId: "post-7-page", postSequence: [7, 8, 1, 2, 3, 4, 5, 6] }
-    };
-    const POST_UNLOCK_CODES = {
-        post1: "SKATT", post2: "STED", post3: "KOMPASS", post4: "EVENTYR",
-        post5: "MYSTERIE", post6: "HEMMELIG", post7: "OPPDRAG", post8: "FINN"
-    };
-    // SVAR PÅ OPPGAVER - Post 6 endret
-    const CORRECT_TASK_ANSWERS = {
-        post1: "KART",
-        post2: "JACK BLACK", 
-        post3: "TRYMSKODE", 
-        post4: "KLOKKA",
-        post5: "GROOT",     
-        post6: "KRISTINESKODE", // ENDRET FRA "NÅL"
-        post7: "BLÅ",       
-        post8: "SVAMP"
-    };
+    // === KONFIGURASJON (DOM-avhengig del) ===
+    // ... (TEAM_CONFIG, POST_UNLOCK_CODES, CORRECT_TASK_ANSWERS som i versjon #22) ...
+    const TEAM_CONFIG = { "SKIPPER": { name: "Team Skipper", startPostId: "post-1-page", postSequence: [1, 2, 3, 4, 5, 6, 7, 8] }, "KOWALSKI": { name: "Team Kowalski", startPostId: "post-3-page", postSequence: [3, 4, 5, 6, 7, 8, 1, 2] }, "RICO": { name: "Team Rico", startPostId: "post-5-page", postSequence: [5, 6, 7, 8, 1, 2, 3, 4] }, "MENIG": { name: "Team Menig", startPostId: "post-7-page", postSequence: [7, 8, 1, 2, 3, 4, 5, 6] } };
+    const POST_UNLOCK_CODES = { post1: "SKATT", post2: "STED", post3: "KOMPASS", post4: "EVENTYR", post5: "MYSTERIE", post6: "HEMMELIG", post7: "OPPDRAG", post8: "FINN" };
+    const CORRECT_TASK_ANSWERS = { post1: "KART", post2: "JACK BLACK", post3: "TRYMSKODE", post4: "KLOKKA", post5: "GROOT", post6: "KRISTINESKODE", post7: "BLÅ", post8: "SVAMP" };
 
     // === KJERNEFUNKSJONER (DOM-avhengige) ===
     // ... (Resten av filen er identisk med script.js Versjon #22)
-    // (setupGpsAudioControls, setupMusicControls, updatePageText, showRebusPage, showTabContent, saveState, loadState, clearState, resetPageUI, resetAllPostUIs, initializeTeam, handlePostUnlock, handleTaskCheck, updateUIAfterLoad, og alle event listeners og initialisering)
     function setupGpsAudioControls() { if (!toggleGpsAudioButton || !gpsAudioVolumeSlider) { console.warn("GPS lydkontroll-elementer mangler."); const gpsControlsDiv = document.getElementById('gps-audio-controls'); if(gpsControlsDiv) gpsControlsDiv.style.display = 'none'; return; } const savedGpsAudioEnabled = localStorage.getItem('rebusGpsAudioEnabled') === 'true'; const savedGpsAudioVolume = localStorage.getItem('rebusGpsAudioVolume'); isGpsAudioEnabled = savedGpsAudioEnabled; if (savedGpsAudioVolume !== null) { gpsAudioVolume = parseFloat(savedGpsAudioVolume); gpsAudioVolumeSlider.value = gpsAudioVolume; } else { gpsAudioVolumeSlider.value = gpsAudioVolume; } toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startContinuousUserPositionUpdate(); } toggleGpsAudioButton.addEventListener('click', () => { isGpsAudioEnabled = !isGpsAudioEnabled; toggleGpsAudioButton.textContent = isGpsAudioEnabled ? "🛰️ GPS På" : "🛰️ GPS Av"; localStorage.setItem('rebusGpsAudioEnabled', isGpsAudioEnabled); if (isGpsAudioEnabled && currentTeamData && currentTeamData.completedPostsCount < TOTAL_POSTS) { startContinuousUserPositionUpdate(); } else { stopContinuousUserPositionUpdate(); } }); gpsAudioVolumeSlider.addEventListener('input', () => { gpsAudioVolume = gpsAudioVolumeSlider.valueAsNumber; localStorage.setItem('rebusGpsAudioVolume', gpsAudioVolume); }); }
     function setupMusicControls() { if (!backgroundAudio || !playPauseButton || !muteUnmuteButton || !volumeSlider) { console.warn("Musikk-kontroll elementer mangler."); if(document.getElementById('music-controls')) document.getElementById('music-controls').style.display = 'none'; return; } const savedVolume = localStorage.getItem('rebusMusicVolume'); const savedMuted = localStorage.getItem('rebusMusicMuted') === 'true'; if (savedVolume !== null) { backgroundAudio.volume = parseFloat(savedVolume); volumeSlider.value = parseFloat(savedVolume); } else { backgroundAudio.volume = 0.5; volumeSlider.value = 0.5; } backgroundAudio.muted = savedMuted; muteUnmuteButton.textContent = savedMuted ? '🔇' : '🔊'; playPauseButton.addEventListener('click', () => { if (backgroundAudio.paused) { backgroundAudio.play().then(() => playPauseButton.textContent = '⏸️').catch(e => console.error("Play feil:", e.name, e.message)); } else { backgroundAudio.pause(); playPauseButton.textContent = '▶️'; } }); muteUnmuteButton.addEventListener('click', () => { backgroundAudio.muted = !backgroundAudio.muted; muteUnmuteButton.textContent = backgroundAudio.muted ? '🔇' : '🔊'; localStorage.setItem('rebusMusicMuted', backgroundAudio.muted); }); volumeSlider.addEventListener('input', () => { backgroundAudio.volume = volumeSlider.value; localStorage.setItem('rebusMusicVolume', volumeSlider.value); if (backgroundAudio.muted && backgroundAudio.volume > 0) { backgroundAudio.muted = false; muteUnmuteButton.textContent = '🔊'; localStorage.setItem('rebusMusicMuted', false); } }); backgroundAudio.load(); backgroundAudio.addEventListener('canplaythrough', () => { console.log("Musikk kan spilles."); if (backgroundAudio.paused) { backgroundAudio.play().then(() => { if (playPauseButton) playPauseButton.textContent = '⏸️'; }).catch(e => { console.warn('Autoplay forhindret:', e.name, e.message); if (playPauseButton) playPauseButton.textContent = '▶️'; }); } }); backgroundAudio.addEventListener('error', (e) => { console.error("Audio feil:", backgroundAudio.error); if (playPauseButton) playPauseButton.textContent = '⚠️'; let errText = "Feil med musikk."; if (backgroundAudio.error) { switch (backgroundAudio.error.code) { case 1: errText += " Avbrutt."; break; case 2: errText += " Nettverk."; break; case 3: errText += " Dekoding."; break; case 4: errText += " Format/kilde."; break; default: errText += " Ukjent."; } } console.error(errText); }); }
     function updatePageText(pageElement, teamPostNumber, globalPostId) { const titleElement = pageElement.querySelector('.post-title-placeholder'); const introElement = pageElement.querySelector('.post-intro-placeholder'); if (titleElement) { titleElement.textContent = `Lagets ${teamPostNumber}. Post: Finn Ankomstkoden! 🗝️`; } if (introElement) { const postDetails = POST_LOCATIONS[globalPostId -1]; let postName = postDetails ? postDetails.name : `Post ${globalPostId}`; introElement.textContent = `Dere har nådd deres ${teamPostNumber}. post i rebusløpet, som er ved ${postName}. Se dere rundt og finn ankomstkoden for å låse opp oppgaven!`; if (teamPostNumber === TOTAL_POSTS) { if(titleElement) titleElement.textContent = `Lagets Siste Post: Finn Ankomstkoden! 🏁`; introElement.textContent = `Dette er deres siste post før det store målet! Finn ankomstkoden ved ${postName} for å løse den siste oppgaven.`; } } }
